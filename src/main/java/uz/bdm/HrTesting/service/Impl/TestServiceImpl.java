@@ -1,9 +1,14 @@
 package uz.bdm.HrTesting.service.Impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.Test;
 import uz.bdm.HrTesting.domain.TestSetting;
+import uz.bdm.HrTesting.domain.model.TestFiltr;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.test.TestDto;
 import uz.bdm.HrTesting.dto.test.TestSettingDto;
@@ -17,7 +22,10 @@ import uz.bdm.HrTesting.service.TestService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -140,6 +148,48 @@ public class TestServiceImpl implements TestService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
 
+        return result;
+    }
+
+    @Override
+    public ResponseData findAll(TestFiltr testFiltr,int page, int size) {
+        ResponseData result = new ResponseData();
+        Map<String,Object> map = new HashMap<>();
+        try{
+            Pageable pageable = PageRequest.of(page,size, testFiltr.getDesc()?Sort.by("name").descending():Sort.by("name").ascending());
+            testFiltr.setName(testFiltr.getName()!=null?testFiltr.getName().toLowerCase():null);
+            Page<Test> testPage = testRepository.findAllFiltr(testFiltr,pageable);
+            List<TestDto> testDtoList = testPage.getContent()
+                    .stream()
+                    .map(test -> test.mapToDto()).collect(Collectors.toList());
+            map.put("testDtos",testDtoList);
+            map.put("totalElements",testPage.getTotalElements());
+            map.put("totalPages",testPage.getTotalPages());
+            map.put("currentPage",testPage.getNumber());
+            result.setAccept(true);
+            result.setData(map);
+        } catch (Exception e){
+            result.setAccept(false);
+            result.setMessage("Error get data");
+        }
+        /*try{
+            testFiltr.setName(testFiltr.getName()!=null?testFiltr.getName().toLowerCase():null);
+            Comparator<TestDto> comparator = Comparator.comparing(TestDto::getName);
+            Comparator<TestDto> reverseComparator = Comparator.comparing(TestDto::getName).reversed();
+            List<TestDto> testDtoList = testRepository.findAllFiltr(testFiltr)
+                    .map(Test::mapToDto)
+                    .sorted(testFiltr.getDesc()?comparator:reverseComparator)
+                    .skip(testFiltr.getPage())
+                    .limit(testFiltr.getSize())
+                    .collect(Collectors.toList());
+            result.setAccept(true);
+            result.setData(testDtoList);
+        } catch (Exception e){
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage("Error get data");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }*/
         return result;
     }
 

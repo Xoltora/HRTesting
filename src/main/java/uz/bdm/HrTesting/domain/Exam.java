@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
+import uz.bdm.HrTesting.dto.exam.ExamInfoDto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -20,11 +19,15 @@ import java.util.Date;
 @AllArgsConstructor
 public class Exam extends AuditEntity implements Serializable {
 
+    @OneToOne(mappedBy = "exam")
+    private ExamResult examResult;
+
     @ManyToOne
     private User user;
 
     @ManyToOne
     private Test test;
+
 
     @Column(name = "started")
     private Date started;
@@ -47,5 +50,19 @@ public class Exam extends AuditEntity implements Serializable {
 
     public Exam(Long id) {
         super.setId(id);
+    }
+
+    public ExamInfoDto mapToExamInfoDto(){
+        ExamInfoDto examInfoDto = new ExamInfoDto();
+        examInfoDto.setCreated(super.getCreated());
+        examInfoDto.setDepartmentId(test.getDepartment().getId());
+        examInfoDto.setFio(user.getFio());
+        examInfoDto.setDepartmentName(test.getDepartment().getName());
+        examInfoDto.setStarted(started);
+        examInfoDto.setFinished(finished);
+        examInfoDto.setId(super.getId());
+        examInfoDto.setTestName(test.getName());
+        //examInfoDto.setExamResultDto(examResult.mapToExamResultDto());
+        return examInfoDto;
     }
 }

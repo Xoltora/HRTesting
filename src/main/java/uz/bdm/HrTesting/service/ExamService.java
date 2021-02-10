@@ -18,6 +18,10 @@ public interface ExamService {
 
     ResponseData finish(Long id, UserPrincipal userPrincipal);
 
+    ResponseData findAllNotStarted();
+
+    ResponseData deleteById(Long id);
 
 
+    ResponseData findAllNotChecked();
 }

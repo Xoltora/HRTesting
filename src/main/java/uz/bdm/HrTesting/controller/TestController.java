@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.bdm.HrTesting.domain.model.TestFiltr;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.test.TestDto;
 import uz.bdm.HrTesting.dto.test.TestSettingDto;
@@ -15,6 +16,7 @@ import uz.bdm.HrTesting.service.TestService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @RestController
 @RequestMapping("/test")
@@ -27,8 +29,10 @@ public class TestController {
     }
 
     @GetMapping
-    public  HttpEntity<?> findAll(){
-        ResponseData result = testService.findAll();
+    public  HttpEntity<?> findAll(@RequestParam(value = "page",defaultValue = "0") int page,
+                                  @RequestParam(value = "size",defaultValue = "10") int size,
+                                  @RequestBody TestFiltr testFiltr){
+        ResponseData result = testService.findAll(testFiltr,page,size);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);
@@ -36,6 +40,7 @@ public class TestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
     }
+
 
     @GetMapping("/list/short")
     public HttpEntity<?> findAllShort(){

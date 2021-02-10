@@ -8,6 +8,7 @@ import uz.bdm.HrTesting.dto.BaseDto;
 import uz.bdm.HrTesting.dto.QuestionDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
+import uz.bdm.HrTesting.dto.exam.ExamInfoDto;
 import uz.bdm.HrTesting.enums.AnswerType;
 import uz.bdm.HrTesting.ropository.*;
 import uz.bdm.HrTesting.security.UserPrincipal;
@@ -348,4 +349,58 @@ public class ExamServiceImpl implements ExamService {
         return result;
     }
 
+    @Override
+    public ResponseData findAllNotStarted() {
+
+        ResponseData responseData = new ResponseData();
+
+        try {
+            List<Exam> notStartedExamList = examRepository.findAllNotStarted();
+            List<ExamInfoDto> examInfoDtoList = notStartedExamList
+                    .stream()
+                    .map(exam -> exam.mapToExamInfoDto()).collect(Collectors.toList());
+            responseData.setAccept(true);
+            responseData.setData(examInfoDtoList);
+        } catch (Exception e) {
+            responseData.setAccept(false);
+            responseData.setMessage("Error get data");
+        }
+
+        return responseData;
+    }
+
+    @Override
+    public ResponseData deleteById(Long id) {
+
+        ResponseData responseData = new ResponseData();
+
+        try {
+           examRepository.deleteById(id);
+           responseData.setAccept(true);
+           responseData.setMessage("Экзамен успешно удалён !");
+        } catch (Exception e){
+            responseData.setAccept(false);
+            responseData.setMessage("Проблема!");
+        }
+        return responseData;
+    }
+
+    @Override
+    public ResponseData findAllNotChecked() {
+        ResponseData responseData = new ResponseData();
+
+        try {
+            List<Exam> notStartedExamList = examRepository.findAllNotChecked();
+            List<ExamInfoDto> examInfoDtoList = notStartedExamList
+                    .stream()
+                    .map(exam -> exam.mapToExamInfoDto()).collect(Collectors.toList());
+            responseData.setAccept(true);
+            responseData.setData(examInfoDtoList);
+        } catch (Exception e) {
+            responseData.setAccept(false);
+            responseData.setMessage("Error get data");
+        }
+
+        return responseData;
+    }
 }

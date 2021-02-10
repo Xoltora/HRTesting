@@ -37,4 +37,14 @@ public interface ExamRepository extends JpaRepository<Exam,Long> {
     @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Exam e WHERE e.test.id = :testId AND e.isDeleted = false")
     Boolean checkExistsTest(@Param("testId") Long testId);
 
+    @Query("SELECT e FROM Exam e WHERE e.isDeleted = false and e.started is null")
+    List<Exam> findAllNotStarted();
+
+    @Query("SELECT e from Exam e WHERE e.isDeleted = false AND e.finished is not null")
+    List<Exam> findAllNotChecked();
+
+    @Modifying
+    @Override
+    @Query("UPDATE Exam e SET e.isDeleted = true where e.id=:id")
+    void deleteById(@Param("id") Long id);
 }
