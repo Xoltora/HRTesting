@@ -3,18 +3,19 @@ package uz.bdm.HrTesting.service.Impl;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.stereotype.Service;
 import uz.bdm.HrTesting.domain.*;
-import uz.bdm.HrTesting.dto.AnswerDto;
-import uz.bdm.HrTesting.dto.BaseDto;
-import uz.bdm.HrTesting.dto.QuestionDto;
-import uz.bdm.HrTesting.dto.ResponseData;
+import uz.bdm.HrTesting.dto.*;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
 import uz.bdm.HrTesting.dto.exam.ExamInfoDto;
 import uz.bdm.HrTesting.enums.AnswerType;
+import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.ropository.*;
 import uz.bdm.HrTesting.security.UserPrincipal;
 import uz.bdm.HrTesting.service.ExamService;
 import uz.bdm.HrTesting.service.QuestionService;
+import uz.bdm.HrTesting.util.HelperFunctions;
 
+import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,15 +28,16 @@ public class ExamServiceImpl implements ExamService {
     private final QuestionRepository questionRepository;
     private final QuestionService questionService;
     private final SelectableAnswerRepository selectableAnswerRepository;
+    private final ExamResultRepository examResultRepository;
 
-
-    public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository) {
+    public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository, ExamResultRepository examResultRepository) {
         this.examRepository = examRepository;
         this.examDetailRepository = examDetailRepository;
         this.testSettingRepository = testSettingRepository;
         this.questionRepository = questionRepository;
         this.questionService = questionService;
         this.selectableAnswerRepository = selectableAnswerRepository;
+        this.examResultRepository = examResultRepository;
     }
 
     @Override
@@ -44,13 +46,16 @@ public class ExamServiceImpl implements ExamService {
 
         try {
 
-            List<Exam> allTest = examRepository.findAllTestByUserId(userPrincipal.getId());
+            List<Exam> allTest = examRepository.findAllTestByUserIdStateNot(userPrincipal.getId(),ExamState.ON_PROCESS);
 
-            List<BaseDto> collect = allTest.stream().map(
-                    exam -> new BaseDto(
-                            exam.getId(),
-                            exam.getTest().getName()
-                    )
+            List<Map<String, Object>> collect = allTest.stream().map(
+                    exam -> {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("id", exam.getId());
+                        map.put("name", exam.getTest().getName());
+                        map.put("state", exam.getState());
+                        return map;
+                    }
             ).collect(Collectors.toList());
 
             result.setAccept(true);
@@ -144,6 +149,7 @@ public class ExamServiceImpl implements ExamService {
             test.put("id", id);
             test.put("time", exam.getTime());
             test.put("questions", questionDtoList);
+            test.put("name", exam.getTest().getName());
             test.put("started", exam.getStarted());
             Date finishedDate = DateUtils.addMinutes(exam.getStarted(), exam.getTime());
             Date currentDate = new Date();
@@ -184,11 +190,12 @@ public class ExamServiceImpl implements ExamService {
             test.put("id", examId);
             test.put("time", exam.getTime());
             test.put("questions", allWithAnswer.getData());
-
+            test.put("name", exam.getTest().getName());
             Date currentDate = new Date();
             test.put("started", currentDate);
 
             exam.setStarted(currentDate);
+            exam.setState(ExamState.ON_PROCESS);
             examRepository.save(exam);
 
             result.setAccept(true);
@@ -235,6 +242,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public ResponseData saveAnswer(ExamAnswerDto examAnswerDto, UserPrincipal userPrincipal) {
         ResponseData result = new ResponseData();
 
@@ -259,9 +267,22 @@ public class ExamServiceImpl implements ExamService {
             QuestionDto questionDto = (QuestionDto) questionById.getData();
 
             if (questionDto.getAnswerType() == AnswerType.WRITTEN) {
-                examDetailRepository.save(examAnswerDto.mapToAnswerTextExamDetailEntity());
+
+                Boolean checkExistAnswerWritten = examDetailRepository.checkExistAnswerWritten(exam.getId(), questionDto.getId());
+
+                if (checkExistAnswerWritten && HelperFunctions.isNotNullOrEmpty(examAnswerDto.getAnswerText())) {
+                    examDetailRepository.deleteByExamIdAndQuestionId(exam.getId(), questionDto.getId());
+                } else if (HelperFunctions.isNotNullOrEmpty(examAnswerDto.getAnswerText())) {
+                    examDetailRepository.save(examAnswerDto.mapToAnswerTextExamDetailEntity());
+                }
+
             } else {
-                examDetailRepository.save(examAnswerDto.mapToAnswerSelectableExamDetailEntity());
+                Boolean checkExistAnswer = examDetailRepository.checkExistAnswer(exam.getId(), questionDto.getId(), examAnswerDto.getAnswerId());
+                if (checkExistAnswer) {
+                    examDetailRepository.deleteByExamIdAndQuestionIdAndSelectableId(exam.getId(), questionDto.getId(), examAnswerDto.getAnswerId());
+                } else {
+                    examDetailRepository.save(examAnswerDto.mapToAnswerSelectableExamDetailEntity());
+                }
             }
 
             result.setAccept(true);
@@ -302,49 +323,43 @@ public class ExamServiceImpl implements ExamService {
 
         try {
 
-            Integer countQuestion = 0;
-            Integer countRight = 0;
-            Integer countWrong = 0;
-            Integer countUnchecked = 0;
-            Integer countNotAnswered = 0;
-            Integer percent = 0;
+            Object[] resultExam = examRepository.getResultExam(exam.getId());
+            ExamResultDto examResultDto = new ExamResultDto();
 
+            examResultDto.setCountQuestion(Integer.parseInt(String.valueOf(resultExam[0])));
 
-            List<Question> questions = questionRepository.findAllByTestId(exam.getTest().getId());
-            List<ExamDetail> examDetailList = examDetailRepository.findByExamIdAndIsDeletedNot(exam.getId(), true);
+            Integer countMarked = Integer.parseInt(String.valueOf(resultExam[1]));
 
+            examResultDto.setCountRight(Integer.parseInt(String.valueOf(resultExam[2])));
+            examResultDto.setCountUnchecked(Integer.parseInt(String.valueOf(resultExam[3])));
+            examResultDto.setCountNotAnswered(examResultDto.getCountQuestion() - countMarked);
+            examResultDto.setCountWrong(countMarked - examResultDto.getCountRight() - examResultDto.getCountUnchecked());
 
-            countQuestion = questions.size();
+            Double percent = (examResultDto.getCountRight() / (double) examResultDto.getCountQuestion()) * 100;
+            examResultDto.setPercent(percent.intValue());
 
+            ExamResult examResult = examResultDto.mapToEntity();
+            examResult.setExam(new Exam(exam.getId()));
 
-//            for (Question question : questions) {
-//
-//                if (question.getAnswerType() == AnswerType.WRITTEN) {
-//                    boolean match = examDetailList.stream().allMatch(examDetail -> examDetail.getQuestion().getId().equals(question.getId()));
-//                    if (match) countUnchecked++;
-//                    else countNotAnswered++;
-//
-//                } else if (question.getAnswerType() == AnswerType.ONE_CORRECT) {
-//                    boolean hasValue = false;
-//
-//                    for (ExamDetail examDetail : examDetailList) {
-//                        if (examDetail.getQuestion().getId().equals(question.getId())){
-//
-//                        }
-//                    }
-//
-//                } else {
-//
-//
-//                }
+            examResultRepository.save(examResult);
 
-//            }
+            Date currentDate = new Date();
+            exam.setFinished(currentDate);
+
+            exam.setState(examResultDto.getCountUnchecked() == 0 ?
+                    ExamState.FINISHED : ExamState.MUST_CHECKED);
+
+            examRepository.save(exam);
+
+            Long inMs = (currentDate.getTime() - exam.getStarted().getTime()) / 1000;
+            examResultDto.setTime((inMs / 60) + ":" + (inMs % 60));
 
             result.setAccept(true);
+            result.setData(examResultDto);
         } catch (Exception e) {
             e.printStackTrace();
             result.setAccept(false);
-            result.setMessage("Error save data");
+            result.setMessage("Error get result");
         }
         return result;
     }
@@ -358,7 +373,8 @@ public class ExamServiceImpl implements ExamService {
             List<Exam> notStartedExamList = examRepository.findAllNotStarted();
             List<ExamInfoDto> examInfoDtoList = notStartedExamList
                     .stream()
-                    .map(exam -> exam.mapToExamInfoDto()).collect(Collectors.toList());
+                    .map(exam -> exam.mapToExamInfoDto())
+                    .collect(Collectors.toList());
             responseData.setAccept(true);
             responseData.setData(examInfoDtoList);
         } catch (Exception e) {
@@ -375,10 +391,10 @@ public class ExamServiceImpl implements ExamService {
         ResponseData responseData = new ResponseData();
 
         try {
-           examRepository.deleteById(id);
-           responseData.setAccept(true);
-           responseData.setMessage("Экзамен успешно удалён !");
-        } catch (Exception e){
+            examRepository.deleteById(id);
+            responseData.setAccept(true);
+            responseData.setMessage("Экзамен успешно удалён !");
+        } catch (Exception e) {
             responseData.setAccept(false);
             responseData.setMessage("Проблема!");
         }

@@ -16,6 +16,9 @@ public class ExamInfoDto {
     private Long id;
 
     @JsonView(value = View.Exam.class)
+    private Long userId;
+
+    @JsonView(value = View.Exam.class)
     private String fio;
 
     @JsonView(value = View.Exam.class)

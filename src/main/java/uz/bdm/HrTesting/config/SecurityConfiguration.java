@@ -2,6 +2,7 @@ package uz.bdm.HrTesting.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
+import uz.bdm.HrTesting.security.DomainUserDetailsService;
 import uz.bdm.HrTesting.security.jwt.JWTConfigurer;
 import uz.bdm.HrTesting.security.jwt.JWTTokenProvider;
 import uz.bdm.HrTesting.security.jwt.JwtAuthenticationEntryPoint;
@@ -23,14 +25,15 @@ import uz.bdm.HrTesting.security.jwt.JwtAuthenticationEntryPoint;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final JWTTokenProvider JWTTokenProvider;
-
+    private final DomainUserDetailsService domainUserDetailsService;
 //    private final CorsFilter corsFilter;
     private final SecurityProblemSupport problemSupport;
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    public SecurityConfiguration(JWTTokenProvider JWTTokenProvider, SecurityProblemSupport problemSupport, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+    public SecurityConfiguration(JWTTokenProvider JWTTokenProvider, DomainUserDetailsService domainUserDetailsService, SecurityProblemSupport problemSupport, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.JWTTokenProvider = JWTTokenProvider;
+        this.domainUserDetailsService = domainUserDetailsService;
 //        this.corsFilter = corsFilter;
         this.problemSupport = problemSupport;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
@@ -87,5 +90,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private JWTConfigurer securityConfigurerAdapter() {
         return new JWTConfigurer(JWTTokenProvider);
     }
+
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.userDetailsService(domainUserDetailsService).passwordEncoder(passwordEncoder());
+//
+//    }
+
 
 }

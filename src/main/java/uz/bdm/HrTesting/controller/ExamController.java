@@ -81,16 +81,12 @@ public class ExamController {
 
     @GetMapping("/finish/{id}")
     public HttpEntity<?> finish(@PathVariable Long id, UserPrincipal userPrincipal) {
-//        ResponseData result = examService.finish(id, userPrincipal);
-//
-//        if (result.isAccept()) {
-//            return ResponseEntity.status(HttpStatus.OK).body(result);
-//        } else {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-//        }
-        ResponseData result = new ResponseData();
-        result.setAccept(true);
-        result.setData(new ExamResultDto());
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        ResponseData result = examService.finish(id, userPrincipal);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
     }
 }

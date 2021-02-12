@@ -80,7 +80,7 @@ public class QuestionServiceImpl implements QuestionService {
             Question save = questionRepository.save(question);
 
             if (save.getAnswerType() != AnswerType.WRITTEN) {
-                AtomicReference<Integer> countRightAnswer= new AtomicReference<>(0);
+                AtomicReference<Integer> countRightAnswer = new AtomicReference<>(0);
                 List<SelectableAnswer> answerList =
                         questionDto.getAnswers().stream()
                                 .map(answerDto -> {
@@ -278,15 +278,19 @@ public class QuestionServiceImpl implements QuestionService {
                     Question save = questionRepository.save(question2);
 
                     if (save.getAnswerType() != AnswerType.WRITTEN) {
+                        AtomicReference<Integer> countRightAnswer = new AtomicReference<>(0);
                         List<SelectableAnswer> answerList =
                                 questionDto.getAnswers().stream()
                                         .map(answerDto -> {
+                                            if (answerDto.getRight())
+                                                countRightAnswer.getAndSet(countRightAnswer.get() + 1);
                                             answerDto.setId(null);
                                             answerDto.setQuestionId(save.getId());
                                             return answerDto.mapToSelectableAnswer();
                                         })
                                         .collect(Collectors.toList());
-
+                        save.setCountRightAnswer(countRightAnswer.get());
+                        questionRepository.save(save);
                         selectableAnswerRepository.saveAll(answerList);
                     }
 
@@ -404,15 +408,19 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         if (questionDto.getAnswerType() != AnswerType.WRITTEN && questionDto.getAnswers() != null) {
+            AtomicReference<Integer> countRightAnswer = new AtomicReference<>(0);
 
             List<SelectableAnswer> selectableAnswers = questionDto.getAnswers().stream()
                     .map(answerDto -> {
+                        if (answerDto.getRight()) countRightAnswer.getAndSet(countRightAnswer.get() + 1);
+
                         SelectableAnswer selectableAnswer = answerDto.mapToSelectableAnswer();
                         selectableAnswer.setQuestion(question);
                         return selectableAnswer;
                     })
                     .collect(Collectors.toList());
-
+            question.setCountRightAnswer(countRightAnswer.get());
+            questionRepository.save(question);
             selectableAnswerRepository.saveAll(selectableAnswers);
 
             //
@@ -443,18 +451,23 @@ public class QuestionServiceImpl implements QuestionService {
             }
         }
 
-        selectableAnswerRepository.deleteByIdNot(notNulls.stream().map(AnswerDto::getId).collect(Collectors.toList()));
+        selectableAnswerRepository.deleteByIdNot(notNulls.stream().map(AnswerDto::getId).collect(Collectors.toList()),question.getId());
+
+        Integer countRightAnswer = 0;
 
         for (AnswerDto answerDto : notNulls) {
             SelectableAnswer selectableAnswer = selectableAnswerRepository.findById(answerDto.getId()).orElse(null);
             if (selectableAnswer != null) {
+                if (answerDto.getRight()) countRightAnswer++;
+
                 selectableAnswer.setText(answerDto.getText());
                 selectableAnswer.setRight(answerDto.getRight());
 
                 forSave.add(selectableAnswer);
             }
         }
-
+        question.setCountRightAnswer(countRightAnswer);
+        questionRepository.save(question);
         selectableAnswerRepository.saveAll(forSave);
 
     }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
 import uz.bdm.HrTesting.dto.exam.ExamInfoDto;
+import uz.bdm.HrTesting.enums.AnswerType;
+import uz.bdm.HrTesting.enums.ExamState;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -28,7 +30,6 @@ public class Exam extends AuditEntity implements Serializable {
     @ManyToOne
     private Test test;
 
-
     @Column(name = "started")
     private Date started;
 
@@ -38,24 +39,29 @@ public class Exam extends AuditEntity implements Serializable {
     @Column(name = "time")
     private Integer time;
 
+    @Enumerated(EnumType.STRING)
+    private ExamState state;
+
     @Column(name = "is_deleted", nullable = false)
     @JsonIgnore
     private Boolean isDeleted = false;
 
-    public Exam(User user, Test test,Integer time) {
+    public Exam(User user, Test test, Integer time, ExamState state) {
         this.user = user;
         this.test = test;
         this.time = time;
+        this.state = state;
     }
 
     public Exam(Long id) {
         super.setId(id);
     }
 
-    public ExamInfoDto mapToExamInfoDto(){
+    public ExamInfoDto mapToExamInfoDto() {
         ExamInfoDto examInfoDto = new ExamInfoDto();
         examInfoDto.setCreated(super.getCreated());
         examInfoDto.setDepartmentId(test.getDepartment().getId());
+        examInfoDto.setUserId(user.getId());
         examInfoDto.setFio(user.getFio());
         examInfoDto.setDepartmentName(test.getDepartment().getName());
         examInfoDto.setStarted(started);

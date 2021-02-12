@@ -4,6 +4,8 @@ import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
 import uz.bdm.HrTesting.security.UserPrincipal;
 
+import javax.transaction.Transactional;
+
 public interface ExamService {
 
     ResponseData findAll(UserPrincipal userPrincipal);
@@ -14,6 +16,7 @@ public interface ExamService {
 
     ResponseData findById(Long id);
 
+    @Transactional
     ResponseData saveAnswer(ExamAnswerDto examAnswerDto, UserPrincipal userPrincipal);
 
     ResponseData finish(Long id, UserPrincipal userPrincipal);

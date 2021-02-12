@@ -26,7 +26,7 @@ public class Question extends AuditEntity implements Serializable {
     @JoinColumn(name = "test_id")
     private Test test;
 
-    @Column(name = "text")
+//    @Column(name = "text", length = 10485761)
     private String text;
 
     @Enumerated(EnumType.STRING)
@@ -45,10 +45,10 @@ public class Question extends AuditEntity implements Serializable {
     @JsonIgnore
     private Boolean isDeleted = false;
 
-    public QuestionDto mapToDto(){
+    public QuestionDto mapToDto() {
         QuestionDto questionDto = new QuestionDto();
 
-        if (super.getId() != null)  questionDto.setId(super.getId());
+        if (super.getId() != null) questionDto.setId(super.getId());
 
         if (this.test != null) {
             questionDto.setTestId(this.test.getId());

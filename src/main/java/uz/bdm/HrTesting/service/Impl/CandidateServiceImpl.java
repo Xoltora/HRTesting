@@ -7,6 +7,7 @@ import uz.bdm.HrTesting.domain.*;
 import uz.bdm.HrTesting.dto.CandidateDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.BaseDto;
+import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.ropository.ExamRepository;
 import uz.bdm.HrTesting.ropository.TestSettingRepository;
 import uz.bdm.HrTesting.ropository.UserDetailRepository;
@@ -121,7 +122,8 @@ public class CandidateServiceImpl implements CandidateService {
                     examList.add(new Exam(
                             save,
                             test.mapToEntity(),
-                            testSetting.getTime()
+                            testSetting.getTime(),
+                            ExamState.NOT_STARTED
                     ));
                 }
 
@@ -250,7 +252,8 @@ public class CandidateServiceImpl implements CandidateService {
                 examList.add(new Exam(
                         saveUser,
                         test.mapToEntity(),
-                        testSetting.getTime()
+                        testSetting.getTime(),
+                        ExamState.NOT_STARTED
                 ));
             }
         }

@@ -22,7 +22,7 @@ import java.io.Serializable;
 public class Test extends AuditEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "Text")
     private String name;
 
     @ManyToOne
@@ -53,12 +53,12 @@ public class Test extends AuditEntity implements Serializable {
 
         if (super.getCreated() != null) testDto.setCreated(super.getCreated());
 
-         if (this.name != null)  testDto.setName(this.name);
+        if (this.name != null) testDto.setName(this.name);
 
-         if (this.department != null) {
-             testDto.setDepartmentId(this.department.getId());
-             testDto.setDepartmentName(this.department.getName());
-         }
+        if (this.department != null) {
+            testDto.setDepartmentId(this.department.getId());
+            testDto.setDepartmentName(this.department.getName());
+        }
 
         if (this.createdBy != null) testDto.setCreatedBy(this.createdBy);
 

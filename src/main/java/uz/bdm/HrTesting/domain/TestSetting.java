@@ -26,10 +26,10 @@ public class TestSetting extends AuditEntity implements Serializable {
     @JoinColumn(name = "test_id")
     private Test test;
 
-    @Column(name = "title")
+    @Column(name = "title", columnDefinition = "Text")
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "Text")
     private String description;
 
     @Column(name = "number_of_attempts")

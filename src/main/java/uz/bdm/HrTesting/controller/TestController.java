@@ -29,10 +29,8 @@ public class TestController {
     }
 
     @GetMapping
-    public  HttpEntity<?> findAll(@RequestParam(value = "page",defaultValue = "0") int page,
-                                  @RequestParam(value = "size",defaultValue = "10") int size,
-                                  @RequestBody TestFiltr testFiltr){
-        ResponseData result = testService.findAll(testFiltr,page,size);
+    public  HttpEntity<?> findAll(){
+        ResponseData result = testService.findAll();
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);
