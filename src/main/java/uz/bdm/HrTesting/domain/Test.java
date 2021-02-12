@@ -8,11 +8,9 @@ import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
 import uz.bdm.HrTesting.dto.test.TestDto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Getter
 @Setter

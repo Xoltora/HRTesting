@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
+import uz.bdm.HrTesting.dto.QuestionWithChickedDto;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,4 +37,9 @@ public class ExamDetail extends AuditEntity implements Serializable {
     @Column(name = "is_deleted", nullable = false)
     @JsonIgnore
     private Boolean isDeleted = false;
+    
+    
+    
+    
+
 }

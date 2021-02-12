@@ -95,4 +95,8 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             "\n" +
             "\n", nativeQuery = true)
     Object[] getResultExam(@Param("examId") Long examId);
+
+    @Modifying
+    @Query("select e from Exam e where e.state=:state")
+    List<Exam> findByState(@Param("state") ExamState examState);
 }

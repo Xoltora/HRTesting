@@ -8,11 +8,15 @@ import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
 import uz.bdm.HrTesting.dto.AnswerDto;
 import uz.bdm.HrTesting.dto.QuestionDto;
+import uz.bdm.HrTesting.dto.QuestionWithChickedDto;
+import uz.bdm.HrTesting.dto.SelectableAnswerDto;
 import uz.bdm.HrTesting.enums.AnswerType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,7 +30,7 @@ public class Question extends AuditEntity implements Serializable {
     @JoinColumn(name = "test_id")
     private Test test;
 
-//    @Column(name = "text", length = 10485761)
+    @Column(name = "text")
     private String text;
 
     @Enumerated(EnumType.STRING)
@@ -41,11 +45,14 @@ public class Question extends AuditEntity implements Serializable {
     @Column(name = "count_right_ans")
     private Integer countRightAnswer;
 
+    @OneToMany(mappedBy = "question")
+    private Set<SelectableAnswer> selectableAnswers;
+
     @Column(name = "is_deleted", nullable = false)
     @JsonIgnore
     private Boolean isDeleted = false;
 
-    public QuestionDto mapToDto() {
+    public QuestionDto mapToDto(){
         QuestionDto questionDto = new QuestionDto();
 
         if (super.getId() != null) questionDto.setId(super.getId());
@@ -62,6 +69,31 @@ public class Question extends AuditEntity implements Serializable {
         if (this.imagePath != null && this.getImageName() != null) questionDto.setHasImage(true);
 
         return questionDto;
+    }
+
+    public QuestionWithChickedDto mapToChicked(List<SelectableAnswer> selectableAnswers, String writtenAnswerText, Integer checkAnswer){
+        QuestionWithChickedDto questionWithChickedDto = new QuestionWithChickedDto();
+        questionWithChickedDto.setText(text);
+        List<SelectableAnswerDto> selectableAnswerDtoList = new ArrayList<>();
+        questionWithChickedDto.setSelectableAnswerDtoList(selectableAnswerDtoList);
+        questionWithChickedDto.setWrittenAnswerText(writtenAnswerText);
+        if(selectableAnswers!=null){
+        questionWithChickedDto.setRight(checkAnswer!=null &&
+                countRightAnswer==selectableAnswers.size() &&
+                checkAnswer==countRightAnswer);}
+        this.selectableAnswers.forEach(selectableAnswer -> {
+            if(selectableAnswers.contains(selectableAnswer)){
+                SelectableAnswerDto selectableAnswerDto = new SelectableAnswerDto(selectableAnswer.getText(),selectableAnswer.getRight(),true);
+                questionWithChickedDto.getSelectableAnswerDtoList().add(selectableAnswerDto);
+            } else {
+                SelectableAnswerDto selectableAnswerDto = new SelectableAnswerDto(selectableAnswer.getText(),selectableAnswer.getRight(),false);
+                questionWithChickedDto.getSelectableAnswerDtoList().add(selectableAnswerDto);
+            }
+        });
+
+        return questionWithChickedDto;
+
+
     }
 
     public Question(Long id) {

@@ -13,6 +13,7 @@ import uz.bdm.HrTesting.enums.ExamState;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -68,7 +69,8 @@ public class Exam extends AuditEntity implements Serializable {
         examInfoDto.setFinished(finished);
         examInfoDto.setId(super.getId());
         examInfoDto.setTestName(test.getName());
-        //examInfoDto.setExamResultDto(examResult.mapToExamResultDto());
+        examInfoDto.setResult(examResult!=null?examResult.mapToExamResultDto():null);
         return examInfoDto;
     }
+
 }

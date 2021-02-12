@@ -24,4 +24,7 @@ public interface QuestionRepository extends JpaRepository<Question,Long> {
     @Override
     @Query(value = "select q from Question q WHERE q.id = :id and q.isDeleted = false ")
     Optional<Question> findById(@Param("id") Long id);
+
+    @Query("select q from Question q left join q.test t where t.id=(select t.id from Exam e left join e.test et where e.id=:id)")
+    List<Question> findByExamId(@Param("id") Long id);
 }

@@ -46,7 +46,7 @@ public class ExamServiceImpl implements ExamService {
 
         try {
 
-            List<Exam> allTest = examRepository.findAllTestByUserIdStateNot(userPrincipal.getId(),ExamState.ON_PROCESS);
+            List<Exam> allTest = examRepository.findAllTestByUserIdStateNot(userPrincipal.getId(), ExamState.ON_PROCESS);
 
             List<Map<String, Object>> collect = allTest.stream().map(
                     exam -> {
@@ -417,6 +417,25 @@ public class ExamServiceImpl implements ExamService {
             responseData.setMessage("Error get data");
         }
 
+        return responseData;
+    }
+
+    @Override
+    public ResponseData findByState(ExamState examState) {
+        ResponseData responseData = new ResponseData();
+        try {
+            List<Exam> examList = examRepository.findByState(examState);
+            List<ExamInfoDto> examInfoDtoList = examList
+                    .stream()
+                    .map(exam -> exam.mapToExamInfoDto())
+                    .collect(Collectors.toList());
+            responseData.setData(examInfoDtoList);
+            responseData.setAccept(true);
+            responseData.setMessage("Экзамен успешно загружен!");
+        } catch (Exception e){
+            responseData.setAccept(false);
+            responseData.setMessage("Проблема!");
+        }
         return responseData;
     }
 }

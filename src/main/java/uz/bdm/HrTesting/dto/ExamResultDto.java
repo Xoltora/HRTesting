@@ -1,5 +1,7 @@
 package uz.bdm.HrTesting.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,24 +12,20 @@ import javax.persistence.Column;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ExamResultDto {
 
-    @JsonView(value = View.Result.class)
     private Integer countQuestion=0;
 
-    @JsonView(value = View.Result.class)
     private Integer countRight=0;
 
-    @JsonView(value = View.Result.class)
     private Integer countWrong=0;
 
-    @JsonView(value = View.ResultWithUnchecked.class)
     private Integer countUnchecked=0;
 
-    @JsonView(value = View.Result.class)
     private Integer countNotAnswered=0;
 
-    @JsonView(value = View.Result.class)
     private Integer percent=0;
 
     private String time;

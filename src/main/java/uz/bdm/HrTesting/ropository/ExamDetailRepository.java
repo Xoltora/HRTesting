@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uz.bdm.HrTesting.domain.ExamDetail;
+import uz.bdm.HrTesting.domain.SelectableAnswer;
 
 import java.util.List;
 
@@ -27,5 +28,16 @@ public interface ExamDetailRepository extends JpaRepository<ExamDetail, Long> {
     @Modifying
     @Query("UPDATE ExamDetail e SET e.isDeleted = TRUE WHERE e.exam.id = :examId AND e.question.id = :questionId ")
     void deleteByExamIdAndQuestionId(@Param("examId") Long examId, @Param("questionId") Long questionId);
+
+    @Query("select e.selectableAnswer from ExamDetail e left join e.question q where q.id=:id")
+    List<SelectableAnswer> getSelectableAnswerByQuestionId(@Param("id") Long id);
+
+    @Query("select e.writtenAnswerText from ExamDetail e left join e.question q where q.id=:id")
+    String getWrittenTextByQuestionId(@Param("id") Long id);
+
+    @Query("select count(e) from ExamDetail e left join e.question q left join e.selectableAnswer s " +
+            "where q.id=:id and s.right=true group by q")
+    Integer checkAnswer(@Param("id") Long id);
+
 
 }

@@ -2,6 +2,7 @@ package uz.bdm.HrTesting.service;
 
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
+import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.security.UserPrincipal;
 
 import javax.transaction.Transactional;
@@ -27,4 +28,7 @@ public interface ExamService {
 
 
     ResponseData findAllNotChecked();
+
+    ResponseData findByState(ExamState examState);
+
 }
