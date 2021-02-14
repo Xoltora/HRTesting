@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
 import uz.bdm.HrTesting.dto.AnswerDto;
-import uz.bdm.HrTesting.dto.SelectableAnswerDto;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

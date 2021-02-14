@@ -1,7 +1,11 @@
 package uz.bdm.HrTesting.service.Impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.time.DateUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.*;
 import uz.bdm.HrTesting.dto.*;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
@@ -281,7 +285,9 @@ public class ExamServiceImpl implements ExamService {
                 if (checkExistAnswer) {
                     examDetailRepository.deleteByExamIdAndQuestionIdAndSelectableId(exam.getId(), questionDto.getId(), examAnswerDto.getAnswerId());
                 } else {
-                    examDetailRepository.save(examAnswerDto.mapToAnswerSelectableExamDetailEntity());
+                    ExamDetail examDetail = examAnswerDto.mapToAnswerSelectableExamDetailEntity();
+                    examDetail.setRight(selectableAnswerRepository.findRightById(examAnswerDto.getAnswerId()));
+                    examDetailRepository.save(examDetail);
                 }
             }
 
@@ -291,12 +297,14 @@ public class ExamServiceImpl implements ExamService {
             e.printStackTrace();
             result.setAccept(false);
             result.setMessage("Error save answer");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
 
         return result;
     }
 
     @Override
+    @Transactional
     public ResponseData finish(Long id, UserPrincipal userPrincipal) {
 
         ResponseData result = new ResponseData();
@@ -360,29 +368,9 @@ public class ExamServiceImpl implements ExamService {
             e.printStackTrace();
             result.setAccept(false);
             result.setMessage("Error get result");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         return result;
-    }
-
-    @Override
-    public ResponseData findAllNotStarted() {
-
-        ResponseData responseData = new ResponseData();
-
-        try {
-            List<Exam> notStartedExamList = examRepository.findAllNotStarted();
-            List<ExamInfoDto> examInfoDtoList = notStartedExamList
-                    .stream()
-                    .map(exam -> exam.mapToExamInfoDto())
-                    .collect(Collectors.toList());
-            responseData.setAccept(true);
-            responseData.setData(examInfoDtoList);
-        } catch (Exception e) {
-            responseData.setAccept(false);
-            responseData.setMessage("Error get data");
-        }
-
-        return responseData;
     }
 
     @Override
@@ -402,25 +390,6 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public ResponseData findAllNotChecked() {
-        ResponseData responseData = new ResponseData();
-
-        try {
-            List<Exam> notStartedExamList = examRepository.findAllNotChecked();
-            List<ExamInfoDto> examInfoDtoList = notStartedExamList
-                    .stream()
-                    .map(exam -> exam.mapToExamInfoDto()).collect(Collectors.toList());
-            responseData.setAccept(true);
-            responseData.setData(examInfoDtoList);
-        } catch (Exception e) {
-            responseData.setAccept(false);
-            responseData.setMessage("Error get data");
-        }
-
-        return responseData;
-    }
-
-    @Override
     public ResponseData findByState(ExamState examState) {
         ResponseData responseData = new ResponseData();
         try {
@@ -432,10 +401,154 @@ public class ExamServiceImpl implements ExamService {
             responseData.setData(examInfoDtoList);
             responseData.setAccept(true);
             responseData.setMessage("Экзамен успешно загружен!");
-        } catch (Exception e){
+        } catch (Exception e) {
             responseData.setAccept(false);
             responseData.setMessage("Проблема!");
         }
         return responseData;
+    }
+
+    @Override
+    public ResponseData findResultById(Long id, UserPrincipal userPrincipal) {
+        ResponseData result = new ResponseData();
+        try {
+            ExamResult examResult = examResultRepository.findByExamId(id).orElse(null);
+
+            if (examResult == null) {
+                result.setAccept(false);
+                result.setMessage("Результат экзамена не найден ID = " + id);
+                return result;
+            }
+
+            result.setData(examResult.mapToExamResultDto());
+            result.setAccept(true);
+        } catch (Exception e) {
+            result.setAccept(false);
+            result.setMessage("Error find!");
+        }
+        return result;
+    }
+
+    @Override
+    public ResponseData findReportByExamId(Long id, UserPrincipal userPrincipal) {
+        ResponseData result = new ResponseData();
+
+        try {
+            List<Object[]> reportByExamId = examRepository.findReportByExamId(id);
+            List<QuestionReportDto> questionReportDtoList = new ArrayList<>();
+
+            for (Object[] objects : reportByExamId) {
+                QuestionReportDto question = new QuestionReportDto();
+                BigInteger qId = (BigInteger) objects[0];
+                question.setId(qId.longValue());
+                question.setAnswerType(AnswerType.valueOf(String.valueOf(objects[1])));
+                question.setText(String.valueOf(objects[3]));
+                question.setHasImage(HelperFunctions.isNotNullOrEmpty(String.valueOf(objects[4]))
+                        && HelperFunctions.isNotNullOrEmpty(String.valueOf(objects[5])));
+
+                if (question.getAnswerType() != AnswerType.WRITTEN) {
+                    Gson gson = new Gson();
+
+                    List<ParseJsonDto> parseJsonDtos = Arrays.asList(gson.fromJson(String.valueOf(objects[2]), ParseJsonDto[].class));
+
+//                    List<AnswerDto> answers = new ArrayList<>();
+                    JSONArray jsonArray = new JSONArray();
+//                    for (int i = 0; i < jsonArray.length(); i++) {
+//                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+//                        AnswerDto answerDto = new AnswerDto();
+//
+//                        answerDto.setId(jsonObject.getLong("id"));
+//                        answerDto.setText(jsonObject.getString("text"));
+//                        answerDto.setRight(jsonObject.getBoolean("right_ans"));
+//
+//                        answers.add(answerDto);
+//                    }
+                }
+                question.setRight((Boolean) objects[6]);
+                questionReportDtoList.add(question);
+            }
+
+            result.setAccept(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage("Error get report");
+        }
+
+        return result;
+    }
+
+    @Override
+    public ResponseData findForCheckQuestion(Long examId, UserPrincipal userPrincipal) {
+        ResponseData result = new ResponseData();
+
+        try {
+            List<ExamDetail> allForCheckQuestion = examDetailRepository.findAllForCheckQuestion(examId);
+            List<Map<String, Object>> data = new ArrayList<>();
+
+            for (ExamDetail examDetail : allForCheckQuestion) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("id", examDetail.getExam().getId());
+                map.put("questionId", examDetail.getQuestion().getId());
+                map.put("text", examDetail.getQuestion().getText());
+                map.put("hasImage", (HelperFunctions.isNotNullOrEmpty(examDetail.getQuestion().getImageName())
+                        && HelperFunctions.isNotNullOrEmpty(examDetail.getQuestion().getImagePath())));
+                map.put("answer", examDetail.getWrittenAnswerText());
+
+                data.add(map);
+            }
+
+            result.setData(data);
+            result.setAccept(true);
+        } catch (Exception e) {
+            result.setAccept(false);
+            result.setMessage("Error find questions!");
+        }
+
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public ResponseData checkAnswer(CheckAnswerDto checkAnswerDto, UserPrincipal userPrincipal) {
+        ResponseData result = new ResponseData();
+
+        try {
+            ExamDetail byExamIdAndIsDeletedNot = examDetailRepository.findByExamIdAndQuestionIdAndIsDeletedNot(checkAnswerDto.getId(), checkAnswerDto.getQuestionId(), true).orElse(null);
+
+            if (byExamIdAndIsDeletedNot == null) {
+                result.setAccept(false);
+                result.setMessage("Вопрос не найден ID = " + checkAnswerDto.getQuestionId());
+                return result;
+            }
+
+            if (byExamIdAndIsDeletedNot.getRight() != null){
+                result.setAccept(false);
+                result.setMessage("Этот вопрос был проверен ID = " + checkAnswerDto.getQuestionId());
+                return result;
+            }
+
+            byExamIdAndIsDeletedNot.setRight(checkAnswerDto.getRight());
+
+            examDetailRepository.save(byExamIdAndIsDeletedNot);
+            Exam exam = examRepository.findById(checkAnswerDto.getId()).orElse(null);
+
+            ExamResult examResult = exam.getExamResult();
+            examResult.setCountUnchecked(examResult.getCountUnchecked() - 1);
+            examResultRepository.save(examResult);
+
+            if (examResult.getCountUnchecked() == 0) {
+                 exam.setState(ExamState.FINISHED);
+                 examRepository.save(exam);
+            }
+
+            result.setMessage("Успешно сохранено !!");
+            result.setAccept(true);
+        } catch (Exception e) {
+            result.setAccept(false);
+            result.setMessage("Error find questions!");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return result;
     }
 }

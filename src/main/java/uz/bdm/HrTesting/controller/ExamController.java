@@ -5,13 +5,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uz.bdm.HrTesting.dto.ExamResultDto;
+import uz.bdm.HrTesting.dto.CheckAnswerDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
 import uz.bdm.HrTesting.security.CurrentUser;
 import uz.bdm.HrTesting.security.UserPrincipal;
 import uz.bdm.HrTesting.service.ExamService;
 import uz.bdm.HrTesting.util.View;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/exam")
@@ -89,4 +91,49 @@ public class ExamController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
     }
+
+    @GetMapping("/result/by/{id}")
+    public HttpEntity<?> resultById(@PathVariable Long id, UserPrincipal userPrincipal) {
+        ResponseData result = examService.findResultById(id, userPrincipal);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @GetMapping("/report/{id}")
+    public HttpEntity<?> reportByExamId(@PathVariable Long id, UserPrincipal userPrincipal) {
+        ResponseData result = examService.findReportByExamId(id, userPrincipal);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @GetMapping("/question/for-check/{examId}")
+    public HttpEntity<?> forCheckQuestion(@PathVariable Long examId, @CurrentUser UserPrincipal userPrincipal) {
+        ResponseData result = examService.findForCheckQuestion(examId, userPrincipal);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @PostMapping("/check/answer")
+    public HttpEntity<?> checkAnswer(@Valid @RequestBody CheckAnswerDto checkAnswerDto, @CurrentUser UserPrincipal userPrincipal) {
+        ResponseData result = examService.checkAnswer(checkAnswerDto, userPrincipal);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
 }

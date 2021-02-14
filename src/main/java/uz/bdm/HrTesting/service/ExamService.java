@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.service;
 
+import uz.bdm.HrTesting.dto.CheckAnswerDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
 import uz.bdm.HrTesting.enums.ExamState;
@@ -20,15 +21,19 @@ public interface ExamService {
     @Transactional
     ResponseData saveAnswer(ExamAnswerDto examAnswerDto, UserPrincipal userPrincipal);
 
+    @Transactional
     ResponseData finish(Long id, UserPrincipal userPrincipal);
-
-    ResponseData findAllNotStarted();
 
     ResponseData deleteById(Long id);
 
-
-    ResponseData findAllNotChecked();
-
     ResponseData findByState(ExamState examState);
 
+    ResponseData findResultById(Long id,UserPrincipal userPrincipal);
+
+    ResponseData findReportByExamId(Long id, UserPrincipal userPrincipal);
+
+    ResponseData findForCheckQuestion(Long examId, UserPrincipal userPrincipal);
+
+    @Transactional
+    ResponseData checkAnswer(CheckAnswerDto checkAnswerDto, UserPrincipal userPrincipal);
 }

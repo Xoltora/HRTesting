@@ -35,6 +35,7 @@ public class QuestionDto {
     private AnswerType answerType;
 
     @JsonView(value = View.Question.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String image;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -48,6 +49,8 @@ public class QuestionDto {
 
     @JsonView(value = View.QuestionWithAnswer.class)
     private String writtenAnswerText;
+
+    private Boolean right;
 
     public Question mapToEntity() {
         Question question = new Question();

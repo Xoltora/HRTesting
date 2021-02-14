@@ -26,7 +26,6 @@ public interface SelectableAnswerRepository extends JpaRepository<SelectableAnsw
     @Query(value = "UPDATE SelectableAnswer s SET s.isDeleted = true WHERE s.id NOT IN (:ids) and  s.question.id = :questionId and s.isDeleted = false")
     void deleteByIdNot(@Param("ids") List<Long> ids,@Param("questionId") Long questionId) ;
 
-
-
-    List<SelectableAnswer> findByQuestionIdAndRight(Long id, Boolean right);
+    @Query(value = "SELECT s.right FROM SelectableAnswer s WHERE s.id = :id AND s.isDeleted = false ")
+    Boolean findRightById(@Param("id") Long id);
 }
