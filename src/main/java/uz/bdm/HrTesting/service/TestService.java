@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.service;
 
+import org.springframework.http.ResponseEntity;
 import uz.bdm.HrTesting.domain.model.TestFiltr;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.test.TestDto;
@@ -8,6 +9,7 @@ import uz.bdm.HrTesting.dto.test.TitleScreenDto;
 import uz.bdm.HrTesting.security.UserPrincipal;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 
 public interface TestService {
@@ -18,6 +20,8 @@ public interface TestService {
     ResponseData findAll();
 
     ResponseData findAll(TestFiltr testFiltr, int page, int size);
+
+    ResponseEntity findAll(Long departmentId, Date from, Date to, int page, int size);
 
     ResponseData findAllShort();
 

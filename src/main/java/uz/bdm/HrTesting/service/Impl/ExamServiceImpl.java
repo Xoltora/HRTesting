@@ -1,6 +1,12 @@
 package uz.bdm.HrTesting.service.Impl;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.bdm.HrTesting.domain.*;
 import uz.bdm.HrTesting.dto.*;
@@ -432,10 +438,34 @@ public class ExamServiceImpl implements ExamService {
             responseData.setData(examInfoDtoList);
             responseData.setAccept(true);
             responseData.setMessage("Экзамен успешно загружен!");
-        } catch (Exception e){
+        } catch (Exception e) {
             responseData.setAccept(false);
             responseData.setMessage("Проблема!");
         }
         return responseData;
+    }
+
+    @Override
+    public ResponseEntity findAll(Long id, Date from, Date to, int page, int size) {
+
+        ResponseData responseData = new ResponseData();
+        Pageable pageable = PageRequest.of(page, size);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("page",String.valueOf(page));
+        httpHeaders.add("size",String.valueOf(size));
+        try {
+            Page<Exam> examPage = examRepository.findAll(id, from, to, pageable);
+            List<ExamInfoDto> examDtoList = examPage.getContent()
+                    .stream()
+                    .map(exam -> exam.mapToExamInfoDto())
+                    .collect(Collectors.toList());
+            responseData.setAccept(true);
+            responseData.setData(examDtoList);
+        } catch (Exception e){
+            responseData.setAccept(false);
+            responseData.setMessage("Проблемь");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).headers(httpHeaders).body(responseData);
+        }
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
     }
 }
