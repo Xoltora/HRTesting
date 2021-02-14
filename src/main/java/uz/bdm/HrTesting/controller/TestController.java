@@ -1,5 +1,7 @@
 package uz.bdm.HrTesting.controller;
 
+import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import uz.bdm.HrTesting.service.TestService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -29,15 +32,14 @@ public class TestController {
     }
 
     @GetMapping
-    public  HttpEntity<?> findAll(){
-        ResponseData result = testService.findAll();
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public  HttpEntity<?> findAll(@RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date from,
+                                  @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date to,
+                                  @RequestParam(value = "departmentId",required = false) Long departmentId,
+                                  @RequestParam(value = "page",defaultValue = "0") int page,
+                                  @RequestParam(value = "size",defaultValue = "10") int size){
+        return testService.findAll(departmentId,from,to,page,size);
     }
+
 
 
     @GetMapping("/list/short")

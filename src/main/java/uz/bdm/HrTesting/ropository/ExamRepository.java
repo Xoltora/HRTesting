@@ -1,5 +1,7 @@
 package uz.bdm.HrTesting.ropository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +11,7 @@ import uz.bdm.HrTesting.domain.Exam;
 import uz.bdm.HrTesting.dto.BaseDto;
 import uz.bdm.HrTesting.enums.ExamState;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -93,6 +96,14 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     @Modifying
     @Query("select e from Exam e where e.state=:state")
     List<Exam> findByState(@Param("state") ExamState examState);
+
+    @Query("select e from Exam e left join e.test t left join t.department d where (:id is null or d.id=:id) and " +
+            "((cast(:fromDate as date) is null or cast(:toDate as date) is null) or (cast(:fromDate as date)<e.created " +
+            "and cast(:toDate as date)>e.created))")
+    Page<Exam> findAll(@Param("id") Long id,
+                       @Param("fromDate") Date fromDate,
+                       @Param("toDate")Date toDate,
+                       Pageable pageable);
 
 
     @Query(value = " with ansvers as (select ed.exam_id as exam_id,  ed.question_id , count(*) as ans_c  from exam_detail ed   " +

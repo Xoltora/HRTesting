@@ -20,14 +20,11 @@ public class CandidateController {
     }
 
     @GetMapping
-    public HttpEntity<?> findAllList() {
-        ResponseData result = candidateService.findAll();
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public HttpEntity<?> findAllList(@RequestParam(value = "departmentId",required = false) Long departmentId,
+                                     @RequestParam(value = "recruiterId",required = false) Long recruiterId,
+                                     @RequestParam(value = "page",defaultValue = "0") int page,
+                                     @RequestParam(value = "size",defaultValue = "10") int size) {
+        return candidateService.findAll(departmentId,recruiterId,page,size);
     }
 
     @GetMapping("/{id}")

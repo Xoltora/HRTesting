@@ -3,7 +3,12 @@ package uz.bdm.HrTesting.service.Impl;
 import com.google.gson.Gson;
 import org.apache.commons.lang.time.DateUtils;
 import org.json.JSONArray;
-import org.json.JSONObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.*;
@@ -389,6 +394,7 @@ public class ExamServiceImpl implements ExamService {
         return responseData;
     }
 
+
     @Override
     public ResponseData findByState(ExamState examState) {
         ResponseData responseData = new ResponseData();
@@ -406,6 +412,30 @@ public class ExamServiceImpl implements ExamService {
             responseData.setMessage("Проблема!");
         }
         return responseData;
+    }
+
+    @Override
+    public ResponseEntity findAll(Long id, Date from, Date to, int page, int size) {
+
+        ResponseData responseData = new ResponseData();
+        Pageable pageable = PageRequest.of(page, size);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("page",String.valueOf(page));
+        httpHeaders.add("size",String.valueOf(size));
+        try {
+            Page<Exam> examPage = examRepository.findAll(id, from, to, pageable);
+            List<ExamInfoDto> examDtoList = examPage.getContent()
+                    .stream()
+                    .map(exam -> exam.mapToExamInfoDto())
+                    .collect(Collectors.toList());
+            responseData.setAccept(true);
+            responseData.setData(examDtoList);
+        } catch (Exception e){
+            responseData.setAccept(false);
+            responseData.setMessage("Проблемь");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).headers(httpHeaders).body(responseData);
+        }
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
     }
 
     @Override
@@ -538,8 +568,8 @@ public class ExamServiceImpl implements ExamService {
             examResultRepository.save(examResult);
 
             if (examResult.getCountUnchecked() == 0) {
-                 exam.setState(ExamState.FINISHED);
-                 examRepository.save(exam);
+                exam.setState(ExamState.FINISHED);
+                examRepository.save(exam);
             }
 
             result.setMessage("Успешно сохранено !!");

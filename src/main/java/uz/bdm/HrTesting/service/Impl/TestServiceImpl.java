@@ -4,6 +4,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.Test;
@@ -22,10 +26,7 @@ import uz.bdm.HrTesting.service.TestService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -387,5 +388,28 @@ public class TestServiceImpl implements TestService {
         return result;
     }
 
+    @Override
+    public ResponseEntity findAll(Long departmentId, Date from, Date to, int page, int size) {
 
+        ResponseData responseData = new ResponseData();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        Pageable pageable = PageRequest.of(page,size);
+        try {
+            Page<Test> testPage = testRepository.findAll(from, to, departmentId, pageable);
+            httpHeaders.add("page", String.valueOf(testPage.getNumber()));
+            httpHeaders.add("size", String.valueOf(testPage.getSize()));
+            List<TestDto> testDtoList = testPage.getContent()
+                    .stream()
+                    .map(test -> test.mapToDto())
+                    .collect(Collectors.toList());
+            responseData.setAccept(true);
+            responseData.setData(testDtoList);
+        } catch (Exception e){
+            e.printStackTrace();
+            responseData.setAccept(false);
+            responseData.setMessage("Error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+        }
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
+    }
 }
