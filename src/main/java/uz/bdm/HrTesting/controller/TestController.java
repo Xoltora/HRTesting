@@ -32,8 +32,8 @@ public class TestController {
     }
 
     @GetMapping
-    public  HttpEntity<?> findAll(@RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date from,
-                                  @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date to,
+    public  HttpEntity<?> findAll(@RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+                                  @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
                                   @RequestParam(value = "departmentId",required = false) Long departmentId,
                                   @RequestParam(value = "page",defaultValue = "0") int page,
                                   @RequestParam(value = "size",defaultValue = "10") int size){

@@ -396,34 +396,14 @@ public class ExamServiceImpl implements ExamService {
 
 
     @Override
-    public ResponseData findByState(ExamState examState) {
-        ResponseData responseData = new ResponseData();
-        try {
-            List<Exam> examList = examRepository.findByState(examState);
-            List<ExamInfoDto> examInfoDtoList = examList
-                    .stream()
-                    .map(exam -> exam.mapToExamInfoDto())
-                    .collect(Collectors.toList());
-            responseData.setData(examInfoDtoList);
-            responseData.setAccept(true);
-            responseData.setMessage("Экзамен успешно загружен!");
-        } catch (Exception e) {
-            responseData.setAccept(false);
-            responseData.setMessage("Проблема!");
-        }
-        return responseData;
-    }
-
-    @Override
-    public ResponseEntity findAll(Long id, Date from, Date to, int page, int size) {
-
+    public ResponseEntity findByState(ExamState examState, Long id, Date from, Date to,int page, int size) {
         ResponseData responseData = new ResponseData();
         Pageable pageable = PageRequest.of(page, size);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("page",String.valueOf(page));
         httpHeaders.add("size",String.valueOf(size));
         try {
-            Page<Exam> examPage = examRepository.findAll(id, from, to, pageable);
+            Page<Exam> examPage = examRepository.findByState(examState, id, from, to, pageable);
             List<ExamInfoDto> examDtoList = examPage.getContent()
                     .stream()
                     .map(exam -> exam.mapToExamInfoDto())
@@ -437,6 +417,7 @@ public class ExamServiceImpl implements ExamService {
         }
         return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
     }
+
 
     @Override
     public ResponseData findResultById(Long id, UserPrincipal userPrincipal) {

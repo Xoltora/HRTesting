@@ -14,8 +14,6 @@ public interface ExamService {
 
     ResponseData findAll(UserPrincipal userPrincipal);
 
-    ResponseEntity findAll(Long id, Date from, Date to,int page, int size);
-
     ResponseData info(Long id, UserPrincipal userPrincipal);
 
     ResponseData startExam(Long examId,UserPrincipal userPrincipal);
@@ -30,7 +28,7 @@ public interface ExamService {
 
     ResponseData deleteById(Long id);
 
-    ResponseData findByState(ExamState examState);
+    ResponseEntity findByState(ExamState examState, Long id, Date from, Date to,int page, int size);
 
     ResponseData findResultById(Long id,UserPrincipal userPrincipal);
 

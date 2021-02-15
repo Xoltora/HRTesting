@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.service.ExamService;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("/exam")
@@ -30,15 +33,13 @@ public class Exam1Controller {
     }
 
     @GetMapping("/result/{state}")
-    public HttpEntity<?> byState(@PathVariable ExamState state){
-
-        ResponseData result = examService.findByState(state);
-
-        if(result.isAccept()){
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public HttpEntity<?> byState(@PathVariable ExamState state,
+                                 @RequestParam(value = "departmentId",required = false) Long departmetId,
+                                 @RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+                                 @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+                                 @RequestParam(value = "page",defaultValue = "0") int page,
+                                 @RequestParam(value = "size",defaultValue = "10") int size){
+        return examService.findByState(state,departmetId,from,to,page,size);
     }
 
 }
