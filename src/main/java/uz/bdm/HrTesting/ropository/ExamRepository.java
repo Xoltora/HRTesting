@@ -95,8 +95,8 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     Object[] getResultExam(@Param("examId") Long examId);
 
     @Query("select e from Exam e left join e.test t left join t.department d where e.state=:state and (:id is null or d.id=:id) and " +
-            "((cast(:fromDate as date) is null or cast(:toDate as date) is null) or (cast(:fromDate as date)<e.created " +
-            "and cast(:toDate as date)>e.created))")
+            "((cast(:fromDate as date) is null or cast(:toDate as date) is null) or (cast(:fromDate as date) <= e.created " +
+            "and cast(:toDate as date) >= e.created))")
     Page<Exam> findByState(@Param("state") ExamState examState,
                            @Param("id") Long id,
                            @Param("fromDate") @Temporal Date fromDate,

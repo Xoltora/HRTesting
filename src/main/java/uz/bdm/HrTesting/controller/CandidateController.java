@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.service.CandidateService;
 
 import javax.validation.Valid;
+import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/candidate")
@@ -20,11 +23,13 @@ public class CandidateController {
     }
 
     @GetMapping
-    public HttpEntity<?> findAllList(@RequestParam(value = "departmentId",required = false) Long departmentId,
-                                     @RequestParam(value = "recruiterId",required = false) Long recruiterId,
-                                     @RequestParam(value = "page",defaultValue = "0") int page,
-                                     @RequestParam(value = "size",defaultValue = "10") int size) {
-        return candidateService.findAll(departmentId,recruiterId,page,size);
+    public HttpEntity<?> findAllList(@RequestParam(value = "departmentId", required = false) List<Long> departmentId,
+                                     @RequestParam(value = "recruiterId", required = false) List<Long> recruiterId,
+                                     @RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+                                     @RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+                                     @RequestParam(value = "page", defaultValue = "0") int page,
+                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+        return candidateService.findAll(departmentId, recruiterId, from, to, page, size);
     }
 
     @GetMapping("/{id}")

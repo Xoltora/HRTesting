@@ -29,14 +29,10 @@ public class QuestionController {
     }
 
     @GetMapping("/list/{testId}")
-    public ResponseEntity<?> findAll(@PathVariable Long testId) {
-        ResponseData result = questionService.findAll(testId);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public ResponseEntity<?> findAll(@PathVariable Long testId,
+                                     @RequestParam(value = "page", defaultValue = "0") int page,
+                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+        return questionService.findAll(testId, page, size);
     }
 
     @GetMapping("/{id}")

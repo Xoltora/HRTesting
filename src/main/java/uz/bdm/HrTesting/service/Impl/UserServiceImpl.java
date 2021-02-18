@@ -1,5 +1,11 @@
 package uz.bdm.HrTesting.service.Impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uz.bdm.HrTesting.domain.Role;
 import uz.bdm.HrTesting.domain.User;
 import org.springframework.stereotype.Service;
@@ -162,13 +168,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseData findAll(UserPrincipal userPrincipal) {
+    public ResponseEntity findAll(UserPrincipal userPrincipal, int page, int size) {
         ResponseData result = new ResponseData();
-
+        HttpHeaders httpHeaders = new HttpHeaders();
+        Pageable pageable = PageRequest.of(page, size);
         try {
-            List<User> all = userRepository.findAllNotId(userPrincipal.getId());
-
-            List<UserDto> userDtoList = all.stream()
+            Page<User> all = userRepository.findAllNotId(userPrincipal.getId(), pageable);
+            httpHeaders.add("page", String.valueOf(all.getNumber()));
+            httpHeaders.add("size", String.valueOf(all.getSize()));
+            httpHeaders.add("totalPages", String.valueOf(all.getTotalPages()));
+            List<UserDto> userDtoList = all.getContent().stream()
                     .map(user -> user.mapToDto())
                     .collect(Collectors.toList());
 
@@ -179,9 +188,10 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             result.setAccept(false);
             result.setMessage("Error get list ");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
 
-        return result;
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(result);
     }
 
     @Override

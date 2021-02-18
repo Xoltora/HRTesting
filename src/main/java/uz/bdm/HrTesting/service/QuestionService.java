@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.service;
 
+import org.springframework.http.ResponseEntity;
 import uz.bdm.HrTesting.dto.AnswerDto;
 import uz.bdm.HrTesting.dto.QuestionDto;
 import uz.bdm.HrTesting.dto.ResponseData;
@@ -16,7 +17,7 @@ public interface QuestionService {
     @Transactional
     ResponseData save(QuestionDto questionDto, UserPrincipal userPrincipal);
 
-    ResponseData findAll(Long testId);
+    ResponseEntity findAll(Long testId,int page, int size);
 
     ResponseData findAllWithAnswer(Long testId);
 

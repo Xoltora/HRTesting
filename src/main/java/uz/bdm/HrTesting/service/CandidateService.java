@@ -7,12 +7,13 @@ import uz.bdm.HrTesting.security.UserPrincipal;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 
 public interface CandidateService {
 
     ResponseData findAll();
 
-    ResponseEntity findAll(Long departmentId, Long recruiterId, int page, int size);
+    ResponseEntity findAll(List<Long> departmentId, List<Long> recruiterId, Date from, Date to, int page, int size);
 
     ResponseData findById(Long id);
 

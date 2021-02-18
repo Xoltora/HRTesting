@@ -1,5 +1,7 @@
 package uz.bdm.HrTesting.ropository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +19,9 @@ public interface QuestionRepository extends JpaRepository<Question,Long> {
     @Override
     @Query(value = "UPDATE Question q SET q.isDeleted = true WHERE q.id = :id ")
     void deleteById(@Param("id") Long id);
+
+    @Query(value = "select q from Question q WHERE q.isDeleted = false AND q.test.id = :testId ORDER BY q.id DESC")
+    Page<Question> findAllByTestId(@Param("testId") Long testId, Pageable pageable);
 
     @Query(value = "select q from Question q WHERE q.isDeleted = false AND q.test.id = :testId ORDER BY q.id DESC")
     List<Question> findAllByTestId(@Param("testId") Long testId);

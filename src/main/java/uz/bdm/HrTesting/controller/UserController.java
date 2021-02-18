@@ -25,14 +25,10 @@ public class UserController {
     }
 
     @GetMapping
-    public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal) {
-        ResponseData result = userService.findAll(userPrincipal);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal,
+                                     @RequestParam(value = "page", defaultValue = "0") int page,
+                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+        return userService.findAll(userPrincipal, page, size);
     }
 
     @GetMapping("/info")
@@ -91,7 +87,7 @@ public class UserController {
 
     @PutMapping("/password")
     public HttpEntity<?> updatePassword(@CurrentUser UserPrincipal userPrincipal, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
-        ResponseData result = userService.updatePassword(userPrincipal,changePasswordDto);
+        ResponseData result = userService.updatePassword(userPrincipal, changePasswordDto);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);

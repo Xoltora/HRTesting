@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.service;
 
+import org.springframework.http.ResponseEntity;
 import uz.bdm.HrTesting.domain.User;
 import uz.bdm.HrTesting.dto.ChangePasswordDto;
 import uz.bdm.HrTesting.dto.ResponseData;
@@ -21,7 +22,7 @@ public interface UserService {
 
     ResponseData deleteById(Long id);
 
-    ResponseData findAll(UserPrincipal userPrincipal);
+    ResponseEntity findAll(UserPrincipal userPrincipal,int page,int size);
 
     ResponseData updatePassword(UserPrincipal userPrincipal, ChangePasswordDto changePasswordDto);
 

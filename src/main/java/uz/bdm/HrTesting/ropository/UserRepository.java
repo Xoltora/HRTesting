@@ -1,5 +1,7 @@
 package uz.bdm.HrTesting.ropository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
   Optional<User> findByLogin(String login);
 
   @Query(value = "select u from u_user u WHERE u.isDeleted = false and u.id <> :id ORDER BY  u.id DESC")
-  List<User> findAllNotId(@Param("id") Long id);
+  Page<User> findAllNotId(@Param("id") Long id, Pageable pageable);
 
 
   @Override

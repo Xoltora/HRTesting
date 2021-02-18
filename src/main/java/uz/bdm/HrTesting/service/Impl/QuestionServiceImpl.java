@@ -1,5 +1,11 @@
 package uz.bdm.HrTesting.service.Impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.Question;
@@ -111,12 +117,18 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public ResponseData findAll(Long testId) {
+    public ResponseEntity findAll(Long testId, int page, int size) {
 
         ResponseData result = new ResponseData();
-
+        HttpHeaders httpHeaders = new HttpHeaders();
+        Pageable pageable = PageRequest.of(page, size);
         try {
-            List<Question> questions = questionRepository.findAllByTestId(testId);
+            Page<Question> questions = questionRepository.findAllByTestId(testId,pageable);
+
+            httpHeaders.add("page", String.valueOf(questions.getNumber()));
+            httpHeaders.add("size", String.valueOf(questions.getSize()));
+            httpHeaders.add("totalPages", String.valueOf(questions.getTotalPages()));
+
             List<QuestionDto> questionDtoList = questions.stream()
                     .map(question -> question.mapToDto())
                     .collect(Collectors.toList());
@@ -129,9 +141,9 @@ public class QuestionServiceImpl implements QuestionService {
             result.setAccept(false);
             result.setMessage("Error saving data");
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
-
-        return result;
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(result);
     }
 
     @Override
@@ -451,7 +463,7 @@ public class QuestionServiceImpl implements QuestionService {
             }
         }
 
-        selectableAnswerRepository.deleteByIdNot(notNulls.stream().map(AnswerDto::getId).collect(Collectors.toList()),question.getId());
+        selectableAnswerRepository.deleteByIdNot(notNulls.stream().map(AnswerDto::getId).collect(Collectors.toList()), question.getId());
 
         Integer countRightAnswer = 0;
 

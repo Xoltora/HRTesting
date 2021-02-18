@@ -69,6 +69,33 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
+    public ResponseEntity findAll(List<Long> departmentId, List<Long> recruiterId, Date from, Date to, int page, int size) {
+
+        ResponseData responseData = new ResponseData();
+        Pageable pageable = PageRequest.of(page, size);
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+        try {
+            Page<UserDetail> userDetailPage = userDetailRepository.findAll(departmentId, recruiterId, from, to,pageable);
+            httpHeaders.add("page", String.valueOf(userDetailPage.getNumber()));
+            httpHeaders.add("size", String.valueOf(userDetailPage.getSize()));
+            httpHeaders.add("totalPages", String.valueOf(userDetailPage.getTotalPages()));
+            List<CandidateDto> candidateDtoList = userDetailPage.getContent()
+                    .stream()
+                    .map(userDetail -> userDetail.mapToCandidateDto())
+                    .collect(Collectors.toList());
+            responseData.setData(candidateDtoList);
+            responseData.setAccept(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseData.setAccept(false);
+            responseData.setMessage("Проблемь");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseData);
+    }
+
+    @Override
     public ResponseData findById(Long id) {
         ResponseData result = new ResponseData();
 
@@ -264,30 +291,4 @@ public class CandidateServiceImpl implements CandidateService {
         examRepository.saveAll(examList);
     }
 
-    @Override
-    public ResponseEntity findAll(Long departmentId, Long recruiterId, int page, int size) {
-
-        ResponseData responseData = new ResponseData();
-        Pageable pageable = PageRequest.of(page, size);
-        HttpHeaders httpHeaders = new HttpHeaders();
-
-        try {
-            Page<UserDetail> userDetailPage = userDetailRepository.findAll(departmentId, recruiterId, pageable);
-            httpHeaders.add("page",String.valueOf(userDetailPage.getNumber()));
-            httpHeaders.add("size",String.valueOf(userDetailPage.getSize()));
-            httpHeaders.add("totalPages",String.valueOf(userDetailPage.getTotalPages()));
-            List<CandidateDto> candidateDtoList = userDetailPage.getContent()
-                    .stream()
-                    .map(userDetail -> userDetail.mapToCandidateDto())
-                    .collect(Collectors.toList());
-            responseData.setData(candidateDtoList);
-            responseData.setAccept(true);
-        } catch (Exception e){
-            e.printStackTrace();
-            responseData.setAccept(false);
-            responseData.setMessage("Проблемь");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(responseData);
-    }
 }
