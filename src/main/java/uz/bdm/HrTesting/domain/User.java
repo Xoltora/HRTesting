@@ -16,7 +16,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -72,7 +71,7 @@ public class User extends AuditEntity implements Serializable {
 
         if (this.fio != null) userDto.setFio(this.fio);
 
-        if (this.isActive != null) userDto.setActive(this.isActive);
+        if (this.isActive != null) userDto.setIsActive(this.isActive);
 
         if (this.roles != null)
             userDto.setRoles(this.roles.stream().map(role -> role.getName()).collect(Collectors.toList()));

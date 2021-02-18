@@ -47,9 +47,9 @@ public interface TestRepository extends JpaRepository<Test,Long> {
 
     @Query("select t from Test t left join t.department d where ((cast(:fromDate as date) is null and cast(:toDate as date) is null) " +
             "or (cast(t.created as date)>cast(:fromDate as date) and cast(t.created as date)<cast(:toDate as date))) and " +
-            "(:id is null or d.id = :id)")
+            "(:id is null or d.id in (:id))")
     Page<Test> findAll(@Param("fromDate") @Temporal Date from,
                        @Param("toDate") @Temporal Date to,
-                       @Param("id") Long id,
+                       @Param("id") List<Long> id,
                        Pageable pageable);
 }

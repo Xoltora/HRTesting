@@ -1,6 +1,7 @@
 package uz.bdm.HrTesting.service;
 
 import uz.bdm.HrTesting.domain.User;
+import uz.bdm.HrTesting.dto.ChangePasswordDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.UserDto;
 import uz.bdm.HrTesting.security.UserPrincipal;
@@ -20,6 +21,8 @@ public interface UserService {
 
     ResponseData deleteById(Long id);
 
-    ResponseData findAll();
+    ResponseData findAll(UserPrincipal userPrincipal);
+
+    ResponseData updatePassword(UserPrincipal userPrincipal, ChangePasswordDto changePasswordDto);
 
 }

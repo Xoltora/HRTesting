@@ -1,10 +1,9 @@
 package uz.bdm.HrTesting.service.Impl;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import uz.bdm.HrTesting.domain.Recruiter;
 import uz.bdm.HrTesting.domain.Role;
 import uz.bdm.HrTesting.domain.User;
 import org.springframework.stereotype.Service;
+import uz.bdm.HrTesting.dto.ChangePasswordDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.UserDto;
 import uz.bdm.HrTesting.ropository.UserRepository;
@@ -70,6 +69,7 @@ public class UserServiceImpl implements UserService {
 
             user.setRoles(roles);
             user.setPassword(HelperFunctions.passwordEncode(userDto.getPassword()));
+            user.setIsActive(true);
             User save = userRepository.save(user);
 
             result.setAccept(true);
@@ -105,7 +105,9 @@ public class UserServiceImpl implements UserService {
             }
 
             userDto.setCreated(user.getCreated());
-            userDto.setPassword(user.getPassword());
+            userDto.setLogin(user.getLogin());
+            userDto.setPassword(userDto.getPassword() != null ?
+                    HelperFunctions.passwordEncode(userDto.getPassword()) : user.getPassword());
 
             User user1 = userDto.mapToEntity();
             user1.setRoles(roles);
@@ -160,11 +162,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseData findAll() {
+    public ResponseData findAll(UserPrincipal userPrincipal) {
         ResponseData result = new ResponseData();
 
         try {
-            List<User> all = userRepository.findAll();
+            List<User> all = userRepository.findAllNotId(userPrincipal.getId());
 
             List<UserDto> userDtoList = all.stream()
                     .map(user -> user.mapToDto())
@@ -177,6 +179,35 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             result.setAccept(false);
             result.setMessage("Error get list ");
+        }
+
+        return result;
+    }
+
+    @Override
+    public ResponseData updatePassword(UserPrincipal userPrincipal, ChangePasswordDto changePasswordDto) {
+        ResponseData result = new ResponseData();
+
+        try {
+
+            User user = userRepository.findByLogin(userPrincipal.getLogin()).orElse(null);
+            boolean matchPassword = HelperFunctions.matchPassword(user.getPassword(), changePasswordDto.getOldPassword());
+
+            if (!matchPassword) {
+                result.setAccept(false);
+                result.setMessage("Неверный старый пароль !");
+                return result;
+            }
+
+            user.setPassword(HelperFunctions.passwordEncode(changePasswordDto.getPassword()));
+            userRepository.save(user);
+
+            result.setAccept(true);
+            result.setMessage("Пароль успешно изменен");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage("Error update password ");
         }
 
         return result;

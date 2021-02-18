@@ -26,8 +26,8 @@ public class UserDto {
     @NotNull
     private List<String> roles;
     private Date created;
-    @JsonIgnore
-    private boolean isActive;
+//    @JsonIgnore
+    private Boolean isActive;
 
     public User mapToEntity(){
         User user = new User();
@@ -43,6 +43,8 @@ public class UserDto {
         if (this.login != null ) user.setLogin(this.login);
 
         if (this.created != null) user.setCreated(this.created);
+
+        if (this.isActive != null) user.setIsActive(this.isActive);
 
         return user;
     }

@@ -270,10 +270,12 @@ public class CandidateServiceImpl implements CandidateService {
         ResponseData responseData = new ResponseData();
         Pageable pageable = PageRequest.of(page, size);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("page",String.valueOf(page));
-        httpHeaders.add("size",String.valueOf(size));
+
         try {
             Page<UserDetail> userDetailPage = userDetailRepository.findAll(departmentId, recruiterId, pageable);
+            httpHeaders.add("page",String.valueOf(userDetailPage.getNumber()));
+            httpHeaders.add("size",String.valueOf(userDetailPage.getSize()));
+            httpHeaders.add("totalPages",String.valueOf(userDetailPage.getTotalPages()));
             List<CandidateDto> candidateDtoList = userDetailPage.getContent()
                     .stream()
                     .map(userDetail -> userDetail.mapToCandidateDto())

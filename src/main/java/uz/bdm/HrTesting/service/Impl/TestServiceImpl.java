@@ -389,7 +389,7 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public ResponseEntity findAll(Long departmentId, Date from, Date to, int page, int size) {
+    public ResponseEntity findAll(List<Long> departmentId, Date from, Date to, int page, int size) {
 
         ResponseData responseData = new ResponseData();
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -398,6 +398,8 @@ public class TestServiceImpl implements TestService {
             Page<Test> testPage = testRepository.findAll(from, to, departmentId, pageable);
             httpHeaders.add("page", String.valueOf(testPage.getNumber()));
             httpHeaders.add("size", String.valueOf(testPage.getSize()));
+            httpHeaders.add("totalPages", String.valueOf(testPage.getTotalPages()));
+
             List<TestDto> testDtoList = testPage.getContent()
                     .stream()
                     .map(test -> test.mapToDto())

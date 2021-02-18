@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.bdm.HrTesting.dto.ChangePasswordDto;
 import uz.bdm.HrTesting.dto.RecruiterDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.UserDto;
@@ -24,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping
-    public HttpEntity<?> findAllList() {
-        ResponseData result = userService.findAll();
+    public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal) {
+        ResponseData result = userService.findAll(userPrincipal);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);
@@ -80,6 +81,17 @@ public class UserController {
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable Long id) {
         ResponseData result = userService.deleteById(id);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @PutMapping("/password")
+    public HttpEntity<?> updatePassword(@CurrentUser UserPrincipal userPrincipal, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
+        ResponseData result = userService.updatePassword(userPrincipal,changePasswordDto);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);

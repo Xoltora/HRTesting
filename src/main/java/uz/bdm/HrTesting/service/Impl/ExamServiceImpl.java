@@ -2,13 +2,13 @@ package uz.bdm.HrTesting.service.Impl;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang.time.DateUtils;
-import org.json.JSONArray;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.*;
@@ -38,6 +38,9 @@ public class ExamServiceImpl implements ExamService {
     private final QuestionService questionService;
     private final SelectableAnswerRepository selectableAnswerRepository;
     private final ExamResultRepository examResultRepository;
+
+//    @Autowired
+//    private FinishExamService finishExamService;
 
     public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository, ExamResultRepository examResultRepository) {
         this.examRepository = examRepository;
@@ -207,6 +210,9 @@ public class ExamServiceImpl implements ExamService {
             exam.setState(ExamState.ON_PROCESS);
             examRepository.save(exam);
 
+//            finishExamService.finishExam(exam);
+
+//            finishExam(exam);
             result.setAccept(true);
             result.setData(test);
         } catch (Exception e) {
@@ -400,24 +406,26 @@ public class ExamServiceImpl implements ExamService {
         ResponseData responseData = new ResponseData();
         Pageable pageable = PageRequest.of(page, size);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("page",String.valueOf(page));
-        httpHeaders.add("size",String.valueOf(size));
+//        httpHeaders.add("page",String.valueOf(page));
+//        httpHeaders.add("size",String.valueOf(size));
         try {
             Page<Exam> examPage = examRepository.findByState(examState, id, from, to, pageable);
+            httpHeaders.add("page", String.valueOf(examPage.getNumber()));
+            httpHeaders.add("size", String.valueOf(examPage.getSize()));
+            httpHeaders.add("totalPages", String.valueOf(examPage.getTotalPages()));
             List<ExamInfoDto> examDtoList = examPage.getContent()
                     .stream()
                     .map(exam -> exam.mapToExamInfoDto())
                     .collect(Collectors.toList());
             responseData.setAccept(true);
             responseData.setData(examDtoList);
-        } catch (Exception e){
+        } catch (Exception e) {
             responseData.setAccept(false);
             responseData.setMessage("Проблемь");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).headers(httpHeaders).body(responseData);
         }
         return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
     }
-
 
     @Override
     public ResponseData findResultById(Long id, UserPrincipal userPrincipal) {
@@ -457,28 +465,43 @@ public class ExamServiceImpl implements ExamService {
                 question.setHasImage(HelperFunctions.isNotNullOrEmpty(String.valueOf(objects[4]))
                         && HelperFunctions.isNotNullOrEmpty(String.valueOf(objects[5])));
 
-                if (question.getAnswerType() != AnswerType.WRITTEN) {
+                Boolean isSelected = null;
+
+                if (question.getAnswerType() == AnswerType.WRITTEN) {
+
+                    String s = String.valueOf(objects[2]);
+
+                    if (!s.equals("null")){
+                      isSelected = true;
+                      question.setWrittenAnswerText(s);
+                    }
+
+
+                } else {
                     Gson gson = new Gson();
 
-                    List<ParseJsonDto> parseJsonDtos = Arrays.asList(gson.fromJson(String.valueOf(objects[2]), ParseJsonDto[].class));
+                    List<ParseJsonDto> parseJsonDto = Arrays.asList(gson.fromJson(String.valueOf(objects[2]), ParseJsonDto[].class));
 
-//                    List<AnswerDto> answers = new ArrayList<>();
-                    JSONArray jsonArray = new JSONArray();
-//                    for (int i = 0; i < jsonArray.length(); i++) {
-//                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-//                        AnswerDto answerDto = new AnswerDto();
-//
-//                        answerDto.setId(jsonObject.getLong("id"));
-//                        answerDto.setText(jsonObject.getString("text"));
-//                        answerDto.setRight(jsonObject.getBoolean("right_ans"));
-//
-//                        answers.add(answerDto);
-//                    }
+                    List<AnswerDto> answers = new ArrayList<>();
+                    for (ParseJsonDto jsonDto : parseJsonDto) {
+                        AnswerDto answerDto = new AnswerDto();
+
+                        answerDto.setId(jsonDto.getId());
+                        answerDto.setText(jsonDto.getText());
+                        answerDto.setRight(jsonDto.getIsmarked());
+
+                        if (jsonDto.getIsmarked() && isSelected == null){
+                            isSelected = true;
+                        }
+                        answers.add(answerDto);
+                    }
+                    question.setAnswers(answers);
                 }
-                question.setRight((Boolean) objects[6]);
+                question.setRight( isSelected != null ? ((Boolean) objects[6]) : null);
                 questionReportDtoList.add(question);
             }
 
+            result.setData(questionReportDtoList);
             result.setAccept(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -561,5 +584,19 @@ public class ExamServiceImpl implements ExamService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         return result;
+    }
+
+    @Async("asyncExecutor")
+    public void finishExam(Exam exam) {
+        try {
+            Date finishedDate = DateUtils.addMinutes(exam.getStarted(), exam.getTime());
+            Date currentDate = new Date();
+            System.out.println("started" + new Date());
+            Thread.currentThread().sleep(finishedDate.getTime() - currentDate.getTime());
+            System.out.println("finished" + new Date());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("error finish exam id" + exam.getId());
+        }
     }
 }

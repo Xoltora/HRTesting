@@ -21,7 +21,7 @@ public interface TestService {
 
     ResponseData findAll(TestFiltr testFiltr, int page, int size);
 
-    ResponseEntity findAll(Long departmentId, Date from, Date to, int page, int size);
+    ResponseEntity findAll(List<Long> departmentId, Date from, Date to, int page, int size);
 
     ResponseData findAllShort();
 

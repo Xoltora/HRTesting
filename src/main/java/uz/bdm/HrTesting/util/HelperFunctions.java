@@ -18,6 +18,11 @@ public class HelperFunctions {
         return (string != null && !string.equals("null") && !string.trim().isEmpty());
     }
 
+    public static boolean matchPassword(String newP, String old) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.matches(old, newP);
+    }
+
     public static String randomFileName(String prefix) {
         return RandomStringUtils.random(24, "0123456789abcdefghijklmnopqrstwstuvixyz") + prefix;
     }
@@ -40,7 +45,7 @@ public class HelperFunctions {
 
         StringBuilder password = new StringBuilder();
 
-        for (int i = 0; i < length-4; i++) {
+        for (int i = 0; i < length - 4; i++) {
             password.append(allAllowed[random.nextInt(allAllowed.length)]);
         }
 
