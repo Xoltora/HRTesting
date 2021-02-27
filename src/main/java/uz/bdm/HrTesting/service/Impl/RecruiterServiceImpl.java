@@ -8,6 +8,8 @@ import uz.bdm.HrTesting.ropository.RecruiterRepository;
 import uz.bdm.HrTesting.service.RecruiterService;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RecruiterServiceImpl implements RecruiterService {
@@ -110,8 +112,13 @@ public class RecruiterServiceImpl implements RecruiterService {
         ResponseData result = new ResponseData();
 
         try {
+            List<Recruiter> all = recruiterRepository.findAll();
+            List<RecruiterDto> collect = all.stream()
+                    .map(recruiter -> recruiter.mapToDto())
+                    .collect(Collectors.toList());
+
             result.setAccept(true);
-            result.setData(recruiterRepository.findAll());
+            result.setData(collect);
         } catch (Exception e) {
             e.printStackTrace();
             result.setAccept(false);

@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -153,7 +152,7 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public ResponseData findAll(TestFiltr testFiltr,int page, int size) {
+    public ResponseData findAll(TestFiltr testFiltr,Integer page, Integer size) {
         ResponseData result = new ResponseData();
         Map<String,Object> map = new HashMap<>();
         try{
@@ -195,11 +194,11 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public ResponseData findAllShort() {
+    public ResponseData findAllShort(Long departmentId) {
         ResponseData result = new ResponseData();
 
         try {
-            List<BaseDto> findAllShort = testRepository.findAllShort();
+            List<BaseDto> findAllShort = testRepository.findAllShort(departmentId);
             result.setAccept(true);
             result.setData(findAllShort);
 
@@ -389,7 +388,7 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public ResponseEntity findAll(List<Long> departmentId, Date from, Date to, int page, int size) {
+    public ResponseEntity findAll(List<Long> departmentId, Date from, Date to, Integer page, Integer size) {
 
         ResponseData responseData = new ResponseData();
         HttpHeaders httpHeaders = new HttpHeaders();

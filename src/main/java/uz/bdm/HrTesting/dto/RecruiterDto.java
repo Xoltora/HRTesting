@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import uz.bdm.HrTesting.domain.Recruiter;
@@ -14,6 +15,7 @@ public class RecruiterDto {
     private Long id;
     @NotBlank
     private String fio;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Date created;
 
     public Recruiter mapToEntity() {

@@ -1,11 +1,13 @@
 package uz.bdm.HrTesting.service.Impl;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.Role;
 import uz.bdm.HrTesting.domain.User;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import uz.bdm.HrTesting.service.RoleService;
 import uz.bdm.HrTesting.service.UserService;
 import uz.bdm.HrTesting.util.HelperFunctions;
 
+import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseData save(UserDto userDto, UserPrincipal userPrincipal) {
         ResponseData result = new ResponseData();
         User user = userDto.mapToEntity();
@@ -81,10 +85,17 @@ public class UserServiceImpl implements UserService {
             result.setAccept(true);
             result.setMessage("Пользователь успешно создан !");
             result.setData(save.mapToDto());
+        } catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage(userDto.getLogin() + " уже существует в базе данных !");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         } catch (Exception e) {
             e.printStackTrace();
             result.setAccept(false);
             result.setMessage("Error saving data");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
         }
 
         return result;
@@ -168,7 +179,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity findAll(UserPrincipal userPrincipal, int page, int size) {
+    public ResponseEntity findAll(UserPrincipal userPrincipal, Integer page, Integer size) {
         ResponseData result = new ResponseData();
         HttpHeaders httpHeaders = new HttpHeaders();
         Pageable pageable = PageRequest.of(page, size);

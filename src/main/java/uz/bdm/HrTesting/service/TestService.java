@@ -19,11 +19,11 @@ public interface TestService {
 
     ResponseData findAll();
 
-    ResponseData findAll(TestFiltr testFiltr, int page, int size);
+    ResponseData findAll(TestFiltr testFiltr, Integer page, Integer size);
 
-    ResponseEntity findAll(List<Long> departmentId, Date from, Date to, int page, int size);
+    ResponseEntity findAll(List<Long> departmentId, Date from, Date to, Integer page, Integer size);
 
-    ResponseData findAllShort();
+    ResponseData findAllShort(Long departmentId);
 
     ResponseData findById(Long id);
 

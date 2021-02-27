@@ -37,17 +37,17 @@ public interface TestRepository extends JpaRepository<Test,Long> {
     @Query(value = "select new uz.bdm.HrTesting.dto.BaseDto(" +
             "t.id," +
             "t.name" +
-            ") from Test t WHERE t.isDeleted = false ORDER BY t.id DESC")
-    List<BaseDto> findAllShort();
+            ") from Test t WHERE t.department.id = :departmentId AND t.isDeleted = false ORDER BY t.id DESC")
+    List<BaseDto> findAllShort(@Param("departmentId") Long departmentId);
 
     @Query("select t from Test t left join t.department d where " +
             "(:#{#testFiltr.name} is null OR lower(t.name) like %:#{#testFiltr.name}%)" +
             " AND ((:#{#testFiltr.department}) is null OR d.id in (:#{#testFiltr.department}))")
     Page<Test> findAllFiltr(@Param("testFiltr") TestFiltr testFiltr,Pageable pageable);
 
-    @Query("select t from Test t left join t.department d where ((cast(:fromDate as date) is null and cast(:toDate as date) is null) " +
+    @Query("select t from Test t left join t.department d where t.isDeleted = false  and ((cast(:fromDate as date) is null and cast(:toDate as date) is null) " +
             "or (cast(t.created as date) >= cast(:fromDate as date) and cast(t.created as date) <= cast(:toDate as date))) and " +
-            "(:id is null or d.id in (:id))")
+            "(:id is null or d.id in (:id)) ORDER BY t.id DESC")
     Page<Test> findAll(@Param("fromDate") @Temporal Date from,
                        @Param("toDate") @Temporal Date to,
                        @Param("id") List<Long> id,

@@ -289,7 +289,16 @@ public class ExamServiceImpl implements ExamService {
                     examDetailRepository.deleteByExamIdAndQuestionId(exam.getId(), questionDto.getId());
                 } else if (HelperFunctions.isNotNullOrEmpty(examAnswerDto.getAnswerText())) {
                     examDetailRepository.save(examAnswerDto.mapToAnswerTextExamDetailEntity());
+                }else {
+                    examDetailRepository.deleteByExamIdAndQuestionId(exam.getId(), questionDto.getId());
                 }
+
+            } else if (questionDto.getAnswerType() == AnswerType.ONE_CORRECT) {
+                examDetailRepository.deleteByExamIdAndQuestionId(exam.getId(), questionDto.getId());
+
+                ExamDetail examDetail = examAnswerDto.mapToAnswerSelectableExamDetailEntity();
+                examDetail.setRight(selectableAnswerRepository.findRightById(examAnswerDto.getAnswerId()));
+                examDetailRepository.save(examDetail);
 
             } else {
                 Boolean checkExistAnswer = examDetailRepository.checkExistAnswer(exam.getId(), questionDto.getId(), examAnswerDto.getAnswerId());
@@ -302,17 +311,20 @@ public class ExamServiceImpl implements ExamService {
                 }
             }
 
-            result.setAccept(true);
-            result.setData(examAnswerDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.setAccept(false);
-            result.setMessage("Error save answer");
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
+        result.setAccept(true);
+        result.setData(examAnswerDto);
+    } catch(
+    Exception e)
+
+    {
+        e.printStackTrace();
+        result.setAccept(false);
+        result.setMessage("Error save answer");
+        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+    }
 
         return result;
-    }
+}
 
     @Override
     @Transactional
@@ -351,8 +363,8 @@ public class ExamServiceImpl implements ExamService {
 
             examResultDto.setCountRight(Integer.parseInt(String.valueOf(resultExam[2])));
             examResultDto.setCountUnchecked(Integer.parseInt(String.valueOf(resultExam[3])));
-            examResultDto.setCountNotAnswered(examResultDto.getCountQuestion() - countMarked);
-            examResultDto.setCountWrong(countMarked - examResultDto.getCountRight() - examResultDto.getCountUnchecked());
+            examResultDto.setCountNotAnswered(examResultDto.getCountQuestion() - countMarked - examResultDto.getCountUnchecked());
+            examResultDto.setCountWrong(countMarked - examResultDto.getCountRight());
 
             Double percent = (examResultDto.getCountRight() / (double) examResultDto.getCountQuestion()) * 100;
             examResultDto.setPercent(percent.intValue());
@@ -402,7 +414,7 @@ public class ExamServiceImpl implements ExamService {
 
 
     @Override
-    public ResponseEntity findByState(ExamState examState, Long id, Date from, Date to,int page, int size) {
+    public ResponseEntity findByState(ExamState examState, Long id, Date from, Date to, Integer page, Integer size) {
         ResponseData responseData = new ResponseData();
         Pageable pageable = PageRequest.of(page, size);
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -420,6 +432,7 @@ public class ExamServiceImpl implements ExamService {
             responseData.setAccept(true);
             responseData.setData(examDtoList);
         } catch (Exception e) {
+            e.printStackTrace();
             responseData.setAccept(false);
             responseData.setMessage("Проблемь");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).headers(httpHeaders).body(responseData);
@@ -471,9 +484,9 @@ public class ExamServiceImpl implements ExamService {
 
                     String s = String.valueOf(objects[2]);
 
-                    if (!s.equals("null")){
-                      isSelected = true;
-                      question.setWrittenAnswerText(s);
+                    if (!s.equals("null")) {
+                        isSelected = true;
+                        question.setWrittenAnswerText(s);
                     }
 
 
@@ -490,14 +503,14 @@ public class ExamServiceImpl implements ExamService {
                         answerDto.setText(jsonDto.getText());
                         answerDto.setRight(jsonDto.getIsmarked());
 
-                        if (jsonDto.getIsmarked() && isSelected == null){
+                        if (jsonDto.getIsmarked() && isSelected == null) {
                             isSelected = true;
                         }
                         answers.add(answerDto);
                     }
                     question.setAnswers(answers);
                 }
-                question.setRight( isSelected != null ? ((Boolean) objects[6]) : null);
+                question.setRight(isSelected != null ? ((Boolean) objects[6]) : null);
                 questionReportDtoList.add(question);
             }
 
@@ -556,7 +569,7 @@ public class ExamServiceImpl implements ExamService {
                 return result;
             }
 
-            if (byExamIdAndIsDeletedNot.getRight() != null){
+            if (byExamIdAndIsDeletedNot.getRight() != null) {
                 result.setAccept(false);
                 result.setMessage("Этот вопрос был проверен ID = " + checkAnswerDto.getQuestionId());
                 return result;

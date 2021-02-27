@@ -8,6 +8,7 @@ import uz.bdm.HrTesting.dto.ChangePasswordDto;
 import uz.bdm.HrTesting.dto.RecruiterDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.UserDto;
+import uz.bdm.HrTesting.exception.controller.DocumentNotFoundException;
 import uz.bdm.HrTesting.security.CurrentUser;
 import uz.bdm.HrTesting.security.UserPrincipal;
 import uz.bdm.HrTesting.service.UserService;
@@ -26,8 +27,8 @@ public class UserController {
 
     @GetMapping
     public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal,
-                                     @RequestParam(value = "page", defaultValue = "0") int page,
-                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+                                     @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                     @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return userService.findAll(userPrincipal, page, size);
     }
 

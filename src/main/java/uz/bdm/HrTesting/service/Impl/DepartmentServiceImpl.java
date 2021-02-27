@@ -9,6 +9,7 @@ import uz.bdm.HrTesting.service.DepartmentService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
@@ -110,8 +111,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         ResponseData result = new ResponseData();
 
         try {
+            List<Department> all = departmentRepository.findAll();
+            List<DepartmentDto> collect = all.stream().map(department -> department.mapToDto()).collect(Collectors.toList());
+
             result.setAccept(true);
-            result.setData(departmentRepository.findAll());
+            result.setData(collect);
         } catch (Exception e) {
             e.printStackTrace();
             result.setAccept(false);

@@ -7,6 +7,8 @@ import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.UserDto;
 import uz.bdm.HrTesting.security.UserPrincipal;
 
+import javax.transaction.Transactional;
+
 
 public interface UserService {
 
@@ -14,6 +16,7 @@ public interface UserService {
 
     ResponseData getInfo(UserPrincipal userPrincipal);
 
+    @Transactional
     ResponseData save(UserDto userDto, UserPrincipal userPrincipal);
 
     ResponseData update(UserDto userDto, UserPrincipal userPrincipal);
@@ -22,7 +25,7 @@ public interface UserService {
 
     ResponseData deleteById(Long id);
 
-    ResponseEntity findAll(UserPrincipal userPrincipal,int page,int size);
+    ResponseEntity findAll(UserPrincipal userPrincipal,Integer page,Integer size);
 
     ResponseData updatePassword(UserPrincipal userPrincipal, ChangePasswordDto changePasswordDto);
 

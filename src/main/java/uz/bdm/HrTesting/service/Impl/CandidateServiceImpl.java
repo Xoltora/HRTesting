@@ -1,5 +1,7 @@
 package uz.bdm.HrTesting.service.Impl;
 
+import org.springframework.core.Constants;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,14 +71,14 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-    public ResponseEntity findAll(List<Long> departmentId, List<Long> recruiterId, Date from, Date to, int page, int size) {
+    public ResponseEntity findAll(List<Long> departmentId, List<Long> recruiterId, Date from, Date to, Integer page, Integer size) {
 
         ResponseData responseData = new ResponseData();
         Pageable pageable = PageRequest.of(page, size);
         HttpHeaders httpHeaders = new HttpHeaders();
 
         try {
-            Page<UserDetail> userDetailPage = userDetailRepository.findAll(departmentId, recruiterId, from, to,pageable);
+            Page<UserDetail> userDetailPage = userDetailRepository.findAll(departmentId, recruiterId, from, to, pageable);
             httpHeaders.add("page", String.valueOf(userDetailPage.getNumber()));
             httpHeaders.add("size", String.valueOf(userDetailPage.getSize()));
             httpHeaders.add("totalPages", String.valueOf(userDetailPage.getTotalPages()));
@@ -92,7 +94,7 @@ public class CandidateServiceImpl implements CandidateService {
             responseData.setMessage("Проблемь");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(responseData);
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
     }
 
     @Override
@@ -132,14 +134,15 @@ public class CandidateServiceImpl implements CandidateService {
             user.setLogin(candidateDto.getPassSeries());
 
             String password = HelperFunctions.generatePassword(8);
-            user.setPassword(HelperFunctions.passwordEncode("1"));
+//            user.setPassword(HelperFunctions.passwordEncode("1"));
+            user.setPassword(HelperFunctions.passwordEncode(password));
 
             user.setRoles(new HashSet<>(Arrays.asList(new Role(AuthoritiesConstants.CANDIDATE))));
 
             User save = userRepository.save(user);
 
             UserDetail userDetail = candidateDto.mapToUserDetailEntity(save);
-            userDetail.setPassword("1");
+            userDetail.setPassword(password);
 
             UserDetail saveUserDetail = userDetailRepository.save(userDetail);
 
@@ -166,6 +169,11 @@ public class CandidateServiceImpl implements CandidateService {
             result.setMessage("Кандидат успешно создан !");
             result.setData(saveDto);
 
+        } catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage(candidateDto.getPassSeries() + " уже существует в базе данных !");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         } catch (Exception e) {
             e.printStackTrace();
             result.setAccept(false);
@@ -225,6 +233,11 @@ public class CandidateServiceImpl implements CandidateService {
             result.setMessage("Кандидат успешно создан !");
             result.setData(saveDto);
 
+        } catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage(candidateDto.getPassSeries() + " уже существует в базе данных !");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         } catch (Exception e) {
             e.printStackTrace();
             result.setAccept(false);

@@ -27,8 +27,8 @@ public class CandidateController {
                                      @RequestParam(value = "recruiterId", required = false) List<Long> recruiterId,
                                      @RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
                                      @RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
-                                     @RequestParam(value = "page", defaultValue = "0") int page,
-                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+                                     @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                     @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return candidateService.findAll(departmentId, recruiterId, from, to, page, size);
     }
 

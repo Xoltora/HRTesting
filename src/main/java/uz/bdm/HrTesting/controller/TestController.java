@@ -35,14 +35,14 @@ public class TestController {
     public  HttpEntity<?> findAll(@RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
                                   @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
                                   @RequestParam(value = "departmentId",required = false) List<Long> departmentId,
-                                  @RequestParam(value = "page",defaultValue = "0") int page,
-                                  @RequestParam(value = "size",defaultValue = "10") int size){
+                                  @RequestParam(value = "page",defaultValue = "0") Integer page,
+                                  @RequestParam(value = "size",defaultValue = "10") Integer size){
         return testService.findAll(departmentId,from,to,page,size);
     }
 
     @GetMapping("/list/short")
-    public HttpEntity<?> findAllShort(){
-        ResponseData result = testService.findAllShort();
+    public HttpEntity<?> findAllShort(@RequestParam(value = "departmentId") Long departmentId){
+        ResponseData result = testService.findAllShort(departmentId);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);

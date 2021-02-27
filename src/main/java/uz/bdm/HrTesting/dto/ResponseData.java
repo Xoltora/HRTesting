@@ -25,6 +25,10 @@ public class ResponseData<T> {
         this.errors = errors;
     }
 
+    public ResponseData(boolean accept, String message) {
+        this.accept = accept;
+        this.message = message;
+    }
 
     public boolean isAccept() {
         return accept;

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uz.bdm.HrTesting.domain.User;
 import uz.bdm.HrTesting.domain.UserDetail;
+import uz.bdm.HrTesting.exception.controller.DocumentNotFoundException;
 import uz.bdm.HrTesting.service.UserDetailService;
 import uz.bdm.HrTesting.service.UserService;
 

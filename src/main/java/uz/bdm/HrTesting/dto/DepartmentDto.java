@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import uz.bdm.HrTesting.domain.Department;
@@ -13,6 +14,7 @@ public class DepartmentDto {
     private Long id;
     @NotBlank
     private String name;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Date created;
 
     public Department mapToEntity() {

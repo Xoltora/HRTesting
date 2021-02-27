@@ -37,8 +37,8 @@ public class Exam1Controller {
                                  @RequestParam(value = "departmentId",required = false) Long departmetId,
                                  @RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
                                  @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
-                                 @RequestParam(value = "page",defaultValue = "0") int page,
-                                 @RequestParam(value = "size",defaultValue = "10") int size){
+                                 @RequestParam(value = "page",defaultValue = "0") Integer page,
+                                 @RequestParam(value = "size",defaultValue = "10") Integer size){
         return examService.findByState(state,departmetId,from,to,page,size);
     }
 

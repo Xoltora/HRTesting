@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class CandidateDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String password;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Date created;
 
     @JsonIgnore

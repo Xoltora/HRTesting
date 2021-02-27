@@ -13,7 +13,7 @@ public interface CandidateService {
 
     ResponseData findAll();
 
-    ResponseEntity findAll(List<Long> departmentId, List<Long> recruiterId, Date from, Date to, int page, int size);
+    ResponseEntity findAll(List<Long> departmentId, List<Long> recruiterId, Date from, Date to, Integer page, Integer size);
 
     ResponseData findById(Long id);
 
