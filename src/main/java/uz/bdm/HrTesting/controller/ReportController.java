@@ -24,7 +24,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @GetMapping()
+    @GetMapping
     public HttpEntity<?> report(@RequestParam(value = "from") String from,
                                 @RequestParam(value = "to") String  to) {
 

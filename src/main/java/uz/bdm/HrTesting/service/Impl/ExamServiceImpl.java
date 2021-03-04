@@ -582,6 +582,13 @@ public class ExamServiceImpl implements ExamService {
 
             ExamResult examResult = exam.getExamResult();
             examResult.setCountUnchecked(examResult.getCountUnchecked() - 1);
+
+            if (checkAnswerDto.getRight()) {
+                examResult.setCountRight(examResult.getCountRight() + 1);
+            } else {
+                examResult.setCountWrong(examResult.getCountWrong() + 1);
+            }
+
             examResultRepository.save(examResult);
 
             if (examResult.getCountUnchecked() == 0) {

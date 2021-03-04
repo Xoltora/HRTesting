@@ -134,7 +134,6 @@ public class CandidateServiceImpl implements CandidateService {
             user.setLogin(candidateDto.getPassSeries());
 
             String password = HelperFunctions.generatePassword(8);
-//            user.setPassword(HelperFunctions.passwordEncode("1"));
             user.setPassword(HelperFunctions.passwordEncode(password));
 
             user.setRoles(new HashSet<>(Arrays.asList(new Role(AuthoritiesConstants.CANDIDATE))));

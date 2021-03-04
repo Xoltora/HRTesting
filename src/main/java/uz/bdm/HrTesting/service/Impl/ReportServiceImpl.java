@@ -5,6 +5,7 @@ import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.ropository.ExamResultRepository;
 import uz.bdm.HrTesting.service.ReportService;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -32,7 +33,8 @@ public class ReportServiceImpl implements ReportService {
                 map.put("id", objects[0]);
                 map.put("fio", objects[1]);
                 map.put("countCandidate", objects[2]);
-                map.put("middlePercent", objects[3]);
+                DecimalFormat df = new DecimalFormat("###.##");
+                map.put("middlePercent", df.format(objects[3]));
                 data.add(map);
             }
 

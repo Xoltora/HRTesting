@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
+import uz.bdm.HrTesting.constants.AuthoritiesConstants;
+import uz.bdm.HrTesting.exception.CustomAccessDeniedHandler;
 import uz.bdm.HrTesting.security.DomainUserDetailsService;
 import uz.bdm.HrTesting.security.jwt.JWTConfigurer;
 import uz.bdm.HrTesting.security.jwt.JWTTokenProvider;
@@ -26,7 +28,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final JWTTokenProvider JWTTokenProvider;
     private final DomainUserDetailsService domainUserDetailsService;
-//    private final CorsFilter corsFilter;
+    //    private final CorsFilter corsFilter;
     private final SecurityProblemSupport problemSupport;
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -55,6 +57,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/i18n/**"); // #3
     }
 
+    @Bean
+    public CustomAccessDeniedHandler accessDeniedHandler(){
+        return new CustomAccessDeniedHandler();
+    }
+
     @Override
     public void configure(HttpSecurity http) throws Exception {
         // @formatter:off
@@ -68,9 +75,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf()
                 .disable()
-                .exceptionHandling()
+                .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(problemSupport)
                 .and()
                 .headers()
                 .frameOptions()
@@ -80,8 +86,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/**","/question/**")
-                .permitAll()
+                .antMatchers("/auth/**", "/question/**").permitAll()
+                .antMatchers("/candidate/**", "/question/**","/report/**").hasAuthority(AuthoritiesConstants.Moderator)
+                .antMatchers("/user/**", "/recruiter/**", "/department/**","/role/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                .antMatchers("/user/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .anyRequest().authenticated()
                 .and()
                 .apply(securityConfigurerAdapter());

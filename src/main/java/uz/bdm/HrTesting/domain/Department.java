@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +23,16 @@ public class Department extends AuditEntity implements Serializable {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "is_deleted", nullable = false)
+    @JsonIgnore
+    private Boolean isDeleted = false;
+
     public Department(Long id, String name) {
         super.setId(id);
+        this.name = name;
+    }
+
+    public Department(String name) {
         this.name = name;
     }
 

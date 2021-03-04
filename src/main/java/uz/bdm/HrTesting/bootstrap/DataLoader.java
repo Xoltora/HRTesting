@@ -68,6 +68,7 @@ public class DataLoader implements CommandLineRunner {
 
             Recruiter saveRecruiter = recruiterRepository.save(new Recruiter(
                     "A A A"
+                    ,false
             ));
 
             Test test = new  Test();

@@ -20,7 +20,6 @@ public class UserDto {
     private Long id;
     @NotEmpty
     private String fio;
-    @NotEmpty
     private String login;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String password;

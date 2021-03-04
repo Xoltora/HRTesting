@@ -3,6 +3,7 @@ package uz.bdm.HrTesting.service.Impl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,19 @@ import java.util.Date;
 public class AuthServiceImpl implements AuthService {
 
     private final JWTTokenProvider jwtTokenProvider;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    public AuthServiceImpl(JWTTokenProvider jwtTokenProvider) {
+
+    public AuthServiceImpl(JWTTokenProvider jwtTokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
     @Override
     public ResponseEntity<?> authenticateUser(LoginDto loginDto) {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(loginDto.getLogin(), loginDto.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getLogin(), loginDto.getPassword());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return ResponseEntity.ok(jwtTokenProvider.createAccessAndRefreshToken(authentication));
     }
@@ -43,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
         JWTToken accessToken = jwtTokenProvider.createAccessToken(authentication);
 
-        Date  validityRefreshToken = (Date) result.getData();
+        Date validityRefreshToken = (Date) result.getData();
 
         JwtAuthenticationResponse response = new JwtAuthenticationResponse(
                 accessToken.getToken(),

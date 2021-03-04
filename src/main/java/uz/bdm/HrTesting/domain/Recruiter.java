@@ -1,5 +1,6 @@
 package uz.bdm.HrTesting.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,10 @@ public class Recruiter extends AuditEntity implements Serializable {
     @Column(name = "fio")
     private String fio;
 
+    @Column(name = "is_deleted", nullable = false)
+    @JsonIgnore
+    private Boolean isDeleted = false;
+
     public RecruiterDto mapToDto() {
         RecruiterDto recruiterDto = new RecruiterDto();
 
@@ -36,4 +41,5 @@ public class Recruiter extends AuditEntity implements Serializable {
      super.setId(id);
      this.fio = fio;
     }
+
 }

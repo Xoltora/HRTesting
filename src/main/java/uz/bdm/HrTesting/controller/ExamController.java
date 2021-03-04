@@ -1,19 +1,23 @@
 package uz.bdm.HrTesting.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.dto.CheckAnswerDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
+import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.security.CurrentUser;
 import uz.bdm.HrTesting.security.UserPrincipal;
 import uz.bdm.HrTesting.service.ExamService;
 import uz.bdm.HrTesting.util.View;
 
 import javax.validation.Valid;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/exam")
@@ -26,6 +30,7 @@ public class ExamController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findAll(userPrincipal);
 
@@ -37,6 +42,7 @@ public class ExamController {
     }
 
     @GetMapping("/info/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> info(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.info(id, userPrincipal);
 
@@ -48,6 +54,7 @@ public class ExamController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> findById(@PathVariable Long id) {
         ResponseData result = examService.findById(id);
 
@@ -58,8 +65,32 @@ public class ExamController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR')")
+    public HttpEntity<?> deleteById(@PathVariable("id") Long id){
+        ResponseData result = examService.deleteById(id);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @GetMapping("/result/{state}")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR')")
+    public HttpEntity<?> byState(@PathVariable ExamState state,
+                                 @RequestParam(value = "departmentId",required = false) Long departmetId,
+                                 @RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+                                 @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+                                 @RequestParam(value = "page",defaultValue = "0") Integer page,
+                                 @RequestParam(value = "size",defaultValue = "10") Integer size){
+        return examService.findByState(state,departmetId,from,to,page,size);
+    }
+
     @GetMapping("/start/{examId}")
     @JsonView(value = View.QuestionWithAnswer.class)
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> startExam(@PathVariable Long examId, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.startExam(examId, userPrincipal);
 
@@ -71,6 +102,7 @@ public class ExamController {
     }
 
     @PostMapping("/answer")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> saveAnswer(@RequestBody ExamAnswerDto examAnswerDto, UserPrincipal userPrincipal) {
         ResponseData result = examService.saveAnswer(examAnswerDto, userPrincipal);
 
@@ -82,6 +114,7 @@ public class ExamController {
     }
 
     @GetMapping("/finish/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> finish(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.finish(id, userPrincipal);
 
@@ -93,6 +126,7 @@ public class ExamController {
     }
 
     @GetMapping("/result/by/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> resultById(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.findResultById(id, userPrincipal);
 
@@ -104,6 +138,7 @@ public class ExamController {
     }
 
     @GetMapping("/report/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> reportByExamId(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.findReportByExamId(id, userPrincipal);
 
@@ -115,6 +150,7 @@ public class ExamController {
     }
 
     @GetMapping("/question/for-check/{examId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> forCheckQuestion(@PathVariable Long examId, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findForCheckQuestion(examId, userPrincipal);
 
@@ -126,6 +162,7 @@ public class ExamController {
     }
 
     @PostMapping("/check/answer")
+    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> checkAnswer(@Valid @RequestBody CheckAnswerDto checkAnswerDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.checkAnswer(checkAnswerDto, userPrincipal);
 

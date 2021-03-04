@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uz.bdm.HrTesting.domain.User;
 import uz.bdm.HrTesting.domain.UserDetail;
-import uz.bdm.HrTesting.exception.controller.DocumentNotFoundException;
 import uz.bdm.HrTesting.service.UserDetailService;
 import uz.bdm.HrTesting.service.UserService;
 
@@ -40,7 +39,7 @@ public class DomainUserDetailsService implements UserDetailsService {
         User user = userService.findByLogin(login);
 
         if (user == null)
-            throw new UsernameNotFoundException("User " + login + " was not found in the database");
+            throw new UsernameNotFoundException("Пользователь " + login + "  не найден в базе");
 
         return createUserPrincipal(user);
     }
@@ -53,7 +52,7 @@ public class DomainUserDetailsService implements UserDetailsService {
                 user.getFio(),
                 user.getLogin(),
                 user.getPassword(),
-                true,
+                false,
                 getAuthorities(user));
 
         userPrincipal.setLogin(user.getLogin());
