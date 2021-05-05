@@ -26,7 +26,8 @@ public class RoleServiceImpl implements RoleService {
         result.setAccept(true);
         result.setData(Arrays.asList(
                 AuthoritiesConstants.ADMIN,
-                AuthoritiesConstants.Moderator
+                AuthoritiesConstants.Moderator,
+                AuthoritiesConstants.Recruiter
         ));
 
         return result;

@@ -17,7 +17,7 @@ public interface QuestionService {
     @Transactional
     ResponseData save(QuestionDto questionDto, UserPrincipal userPrincipal);
 
-    ResponseEntity findAll(Long testId,int page, int size);
+    ResponseEntity findAll(Long testId);
 
     ResponseData findAllWithAnswer(Long testId);
 

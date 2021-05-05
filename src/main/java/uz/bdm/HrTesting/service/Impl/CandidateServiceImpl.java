@@ -151,12 +151,14 @@ public class CandidateServiceImpl implements CandidateService {
                 for (BaseDto test : candidateDto.getTests()) {
                     TestSetting testSetting = testSettingRepository.findByTestId(test.getId()).orElse(null);
 
-                    examList.add(new Exam(
-                            save,
-                            test.mapToEntity(),
-                            testSetting.getTime(),
-                            ExamState.NOT_STARTED
-                    ));
+                    for (Integer i = 0; i < testSetting.getNumberOfAttempts(); i++) {
+                        examList.add(new Exam(
+                                save,
+                                test.mapToEntity(),
+                                testSetting.getTime(),
+                                ExamState.NOT_STARTED
+                        ));
+                    }
                 }
 
                 examRepository.saveAll(examList);
@@ -204,7 +206,7 @@ public class CandidateServiceImpl implements CandidateService {
                             candidateDto.getDepartmentName()
                     ));
 
-            userDetail.setRecruiter(new Recruiter(
+            userDetail.setRecruiter(new User(
                     candidateDto.getRecruiterId(),
                     candidateDto.getRecruiterFio()
             ));
@@ -229,7 +231,7 @@ public class CandidateServiceImpl implements CandidateService {
 
             saveDto.setTests(candidateDto.getTests());
             result.setAccept(true);
-            result.setMessage("Кандидат успешно создан !");
+            result.setMessage("Кандидат успешно обновлен !");
             result.setData(saveDto);
 
         } catch (DataIntegrityViolationException e) {
@@ -290,13 +292,14 @@ public class CandidateServiceImpl implements CandidateService {
 
             if (match) {
                 TestSetting testSetting = testSettingRepository.findByTestId(test.getId()).orElse(null);
-
-                examList.add(new Exam(
-                        saveUser,
-                        test.mapToEntity(),
-                        testSetting.getTime(),
-                        ExamState.NOT_STARTED
-                ));
+                for (Integer i = 0; i < testSetting.getNumberOfAttempts(); i++) {
+                    examList.add(new Exam(
+                            saveUser,
+                            test.mapToEntity(),
+                            testSetting.getTime(),
+                            ExamState.NOT_STARTED
+                    ));
+                }
             }
         }
 

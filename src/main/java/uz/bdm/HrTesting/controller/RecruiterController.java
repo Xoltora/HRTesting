@@ -6,71 +6,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.dto.RecruiterDto;
 import uz.bdm.HrTesting.dto.ResponseData;
+import uz.bdm.HrTesting.security.CurrentUser;
+import uz.bdm.HrTesting.security.UserPrincipal;
 import uz.bdm.HrTesting.service.RecruiterService;
+import uz.bdm.HrTesting.service.UserService;
 
 import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/recruiter")
 public class RecruiterController {
-    private final RecruiterService recruiterService;
+    private final UserService userService;
 
-    public RecruiterController(RecruiterService recruiterService) {
-        this.recruiterService = recruiterService;
+    public RecruiterController( UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
-    public HttpEntity<?> findAllList(){
-        ResponseData result = recruiterService.findAll();
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
-    }
-
-    @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable Long id) {
-        ResponseData result = recruiterService.findById(id);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
-    }
-
-    @PostMapping
-    public HttpEntity<?> save(@Valid @RequestBody RecruiterDto recruiterDto) {
-        ResponseData result = recruiterService.save(recruiterDto);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
-    }
-
-    @PutMapping
-    public HttpEntity<?> update(@Valid @RequestBody RecruiterDto recruiterDto) {
-        ResponseData result = recruiterService.update(recruiterDto);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public HttpEntity<?> delete(@PathVariable Long id) {
-        ResponseData result = recruiterService.deleteById(id);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal) {
+        return userService.findAllRecruiter(userPrincipal);
     }
 }

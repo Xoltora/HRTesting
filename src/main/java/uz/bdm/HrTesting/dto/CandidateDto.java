@@ -82,7 +82,7 @@ public class CandidateDto {
 
         if (this.departmentId != null) userDetail.setDepartment(new Department(this.departmentId, this.departmentName));
 
-        if (this.recruiterId != null) userDetail.setRecruiter(new Recruiter(this.recruiterId, this.recruiterFio));
+        if (this.recruiterId != null) userDetail.setRecruiter(new User(this.recruiterId, this.recruiterFio));
 
         return userDetail;
     }

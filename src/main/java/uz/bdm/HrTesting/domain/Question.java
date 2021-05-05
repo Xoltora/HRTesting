@@ -40,9 +40,6 @@ public class Question extends AuditEntity implements Serializable {
     @Column(name = "count_right_ans")
     private Integer countRightAnswer;
 
-    @OneToMany(mappedBy = "question")
-    private Set<SelectableAnswer> selectableAnswers;
-
     @Column(name = "is_deleted", nullable = false)
     @JsonIgnore
     private Boolean isDeleted = false;

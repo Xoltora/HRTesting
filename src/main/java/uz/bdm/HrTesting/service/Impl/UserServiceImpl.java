@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import uz.bdm.HrTesting.constants.AuthoritiesConstants;
 import uz.bdm.HrTesting.domain.Role;
 import uz.bdm.HrTesting.domain.User;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import uz.bdm.HrTesting.service.UserService;
 import uz.bdm.HrTesting.util.HelperFunctions;
 
 import javax.transaction.Transactional;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +33,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleService roleService;
-
 
     public UserServiceImpl(UserRepository userRepository, RoleService roleService) {
         this.userRepository = userRepository;
@@ -184,7 +185,11 @@ public class UserServiceImpl implements UserService {
         HttpHeaders httpHeaders = new HttpHeaders();
         Pageable pageable = PageRequest.of(page, size);
         try {
-            Page<User> all = userRepository.findAllNotId(userPrincipal.getId(), pageable);
+
+            ResponseData byName = roleService.findByName(AuthoritiesConstants.CANDIDATE);
+//            Set<Role> set = new HashSet(Arrays.asList(byName.getData()));
+            Page<User> all = userRepository.findAllNotId(4L, pageable);
+
             httpHeaders.add("page", String.valueOf(all.getNumber()));
             httpHeaders.add("size", String.valueOf(all.getSize()));
             httpHeaders.add("totalPages", String.valueOf(all.getTotalPages()));
@@ -203,6 +208,29 @@ public class UserServiceImpl implements UserService {
         }
 
         return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(result);
+    }
+
+    @Override
+    public ResponseEntity findAllRecruiter(UserPrincipal userPrincipal) {
+        ResponseData result = new ResponseData();
+
+        try {
+            List<User> all = userRepository.findAllRecruiter(userPrincipal.getId());
+
+            List<UserDto> userDtoList = all.stream()
+                    .map(user -> user.mapToDto())
+                    .collect(Collectors.toList());
+
+            result.setAccept(true);
+            result.setData(userDtoList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setAccept(false);
+            result.setMessage("Error get list ");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.*;
@@ -20,6 +19,7 @@ import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.ropository.*;
 import uz.bdm.HrTesting.security.UserPrincipal;
 import uz.bdm.HrTesting.service.ExamService;
+import uz.bdm.HrTesting.service.FinishExamService;
 import uz.bdm.HrTesting.service.QuestionService;
 import uz.bdm.HrTesting.util.HelperFunctions;
 
@@ -38,11 +38,9 @@ public class ExamServiceImpl implements ExamService {
     private final QuestionService questionService;
     private final SelectableAnswerRepository selectableAnswerRepository;
     private final ExamResultRepository examResultRepository;
+    private final FinishExamService finishExamService;
 
-//    @Autowired
-//    private FinishExamService finishExamService;
-
-    public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository, ExamResultRepository examResultRepository) {
+    public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository, ExamResultRepository examResultRepository, FinishExamService finishExamService) {
         this.examRepository = examRepository;
         this.examDetailRepository = examDetailRepository;
         this.testSettingRepository = testSettingRepository;
@@ -50,6 +48,7 @@ public class ExamServiceImpl implements ExamService {
         this.questionService = questionService;
         this.selectableAnswerRepository = selectableAnswerRepository;
         this.examResultRepository = examResultRepository;
+        this.finishExamService = finishExamService;
     }
 
     @Override
@@ -104,7 +103,7 @@ public class ExamServiceImpl implements ExamService {
 
         if (exam.getFinished() != null) {
             result.setAccept(false);
-            result.setMessage("Экзамен окончен!");
+            result.setMessage(" Время для тестирования закончилось!");
             return result;
         }
 
@@ -210,9 +209,8 @@ public class ExamServiceImpl implements ExamService {
             exam.setState(ExamState.ON_PROCESS);
             examRepository.save(exam);
 
-//            finishExamService.finishExam(exam);
+            finishExamService.finishExam(exam);
 
-//            finishExam(exam);
             result.setAccept(true);
             result.setData(test);
         } catch (Exception e) {
@@ -271,7 +269,7 @@ public class ExamServiceImpl implements ExamService {
 
         if (exam.getFinished() != null) {
             result.setAccept(false);
-            result.setMessage("Экзамен окончен!");
+            result.setMessage(" Время для тестирования закончилось!");
             return result;
         }
 
@@ -348,7 +346,7 @@ public class ExamServiceImpl implements ExamService {
 
         if (exam.getFinished() != null) {
             result.setAccept(false);
-            result.setMessage("Экзамен окончен!");
+            result.setMessage("Время для тестирования закончилось!");
             return result;
         }
 
@@ -414,14 +412,14 @@ public class ExamServiceImpl implements ExamService {
 
 
     @Override
-    public ResponseEntity findByState(ExamState examState, Long id, Date from, Date to, Integer page, Integer size) {
+    public ResponseEntity findByState(ExamState examState, Long id, String fio, Date from, Date to, Integer page, Integer size) {
         ResponseData responseData = new ResponseData();
         Pageable pageable = PageRequest.of(page, size);
         HttpHeaders httpHeaders = new HttpHeaders();
 //        httpHeaders.add("page",String.valueOf(page));
 //        httpHeaders.add("size",String.valueOf(size));
         try {
-            Page<Exam> examPage = examRepository.findByState(examState, id, from, to, pageable);
+            Page<Exam> examPage = examRepository.findByState(examState, id, fio, from, to, pageable);
             httpHeaders.add("page", String.valueOf(examPage.getNumber()));
             httpHeaders.add("size", String.valueOf(examPage.getSize()));
             httpHeaders.add("totalPages", String.valueOf(examPage.getTotalPages()));
@@ -585,6 +583,8 @@ public class ExamServiceImpl implements ExamService {
 
             if (checkAnswerDto.getRight()) {
                 examResult.setCountRight(examResult.getCountRight() + 1);
+                Double percent = (examResult.getCountRight() / (double) examResult.getCountQuestion()) * 100;
+                examResult.setPercent(percent.intValue());
             } else {
                 examResult.setCountWrong(examResult.getCountWrong() + 1);
             }
@@ -606,17 +606,5 @@ public class ExamServiceImpl implements ExamService {
         return result;
     }
 
-    @Async("asyncExecutor")
-    public void finishExam(Exam exam) {
-        try {
-            Date finishedDate = DateUtils.addMinutes(exam.getStarted(), exam.getTime());
-            Date currentDate = new Date();
-            System.out.println("started" + new Date());
-            Thread.currentThread().sleep(finishedDate.getTime() - currentDate.getTime());
-            System.out.println("finished" + new Date());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("error finish exam id" + exam.getId());
-        }
-    }
+
 }

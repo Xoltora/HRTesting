@@ -21,9 +21,6 @@ public interface QuestionRepository extends JpaRepository<Question,Long> {
     void deleteById(@Param("id") Long id);
 
     @Query(value = "select q from Question q WHERE q.isDeleted = false AND q.test.id = :testId ORDER BY q.id DESC")
-    Page<Question> findAllByTestId(@Param("testId") Long testId, Pageable pageable);
-
-    @Query(value = "select q from Question q WHERE q.isDeleted = false AND q.test.id = :testId ORDER BY q.id DESC")
     List<Question> findAllByTestId(@Param("testId") Long testId);
 
     @Override

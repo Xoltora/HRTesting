@@ -27,6 +27,8 @@ public interface UserService {
 
     ResponseEntity findAll(UserPrincipal userPrincipal,Integer page,Integer size);
 
+    ResponseEntity findAllRecruiter(UserPrincipal userPrincipal);
+
     ResponseData updatePassword(UserPrincipal userPrincipal, ChangePasswordDto changePasswordDto);
 
 }

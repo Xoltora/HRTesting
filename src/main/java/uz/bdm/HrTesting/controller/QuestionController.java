@@ -3,6 +3,7 @@ package uz.bdm.HrTesting.controller;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.dto.AnswerDto;
 import uz.bdm.HrTesting.dto.QuestionDto;
@@ -29,10 +30,8 @@ public class QuestionController {
     }
 
     @GetMapping("/list/{testId}")
-    public ResponseEntity<?> findAll(@PathVariable Long testId,
-                                     @RequestParam(value = "page", defaultValue = "0") int page,
-                                     @RequestParam(value = "size", defaultValue = "10") int size) {
-        return questionService.findAll(testId, page, size);
+    public ResponseEntity<?> findAll(@PathVariable Long testId) {
+        return questionService.findAll(testId);
     }
 
     @GetMapping("/{id}")
@@ -47,6 +46,7 @@ public class QuestionController {
     }
 
     @PostMapping
+//    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public ResponseEntity<?> save(@Valid @RequestBody QuestionDto questionDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = questionService.save(questionDto, userPrincipal);
 
@@ -58,6 +58,7 @@ public class QuestionController {
     }
 
     @PutMapping
+//    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> question(@Valid @RequestBody QuestionDto questionDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = questionService.update(questionDto, userPrincipal);
 
@@ -69,6 +70,7 @@ public class QuestionController {
     }
 
     @DeleteMapping("/{id}")
+//    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> question(@PathVariable Long id) {
         ResponseData result = questionService.deleteById(id);
 

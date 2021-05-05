@@ -1,10 +1,7 @@
 package uz.bdm.HrTesting.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import uz.bdm.HrTesting.audit.AuditEntity;
 import uz.bdm.HrTesting.dto.DepartmentDto;
 
@@ -12,8 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.io.Serializable;
 
-@Getter
-@Setter
+@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor

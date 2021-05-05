@@ -47,6 +47,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final WrittenAnswerRepository writtenAnswerRepository;
     private final ExamRepository examRepository;
     private final SelectableAnswerRepository selectableAnswerRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -117,17 +118,11 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public ResponseEntity findAll(Long testId, int page, int size) {
+    public ResponseEntity findAll(Long testId) {
 
         ResponseData result = new ResponseData();
-        HttpHeaders httpHeaders = new HttpHeaders();
-        Pageable pageable = PageRequest.of(page, size);
         try {
-            Page<Question> questions = questionRepository.findAllByTestId(testId,pageable);
-
-            httpHeaders.add("page", String.valueOf(questions.getNumber()));
-            httpHeaders.add("size", String.valueOf(questions.getSize()));
-            httpHeaders.add("totalPages", String.valueOf(questions.getTotalPages()));
+            List<Question> questions = questionRepository.findAllByTestId(testId);
 
             List<QuestionDto> questionDtoList = questions.stream()
                     .map(question -> question.mapToDto())
@@ -143,7 +138,7 @@ public class QuestionServiceImpl implements QuestionService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
-        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(result);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @Override
@@ -263,7 +258,6 @@ public class QuestionServiceImpl implements QuestionService {
         if (!updateVersionResult.isAccept()) return updateVersionResult;
 
         try {
-
             List<Question> allByTestId = questionRepository.findAllByTestId(question.getTest().getId());
 
             for (Question question1 : allByTestId) {
@@ -314,6 +308,7 @@ public class QuestionServiceImpl implements QuestionService {
 
                     question1.setTest(new Test((Long) updateVersionResult.getData()));
                     question1.setId(null);
+                    entityManager.detach(question1);
                     Question save = questionRepository.save(question1);
 
                     if (question1.getAnswerType() != AnswerType.WRITTEN) {

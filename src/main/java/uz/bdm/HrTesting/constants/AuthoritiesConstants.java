@@ -9,6 +9,8 @@ public final class AuthoritiesConstants {
 
     public static final String Moderator = "ROLE_MODERATOR";
 
+    public static final String Recruiter = "ROLE_RECRUITER";
+
     public static final String CANDIDATE = "ROLE_CANDIDATE";
 
     private AuthoritiesConstants() {

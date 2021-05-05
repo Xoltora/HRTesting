@@ -24,7 +24,7 @@ public class SelectableAnswer extends AuditEntity implements Serializable {
     @ManyToOne
     private Question question;
 
-    @Column(name = "text")
+    @Column(name = "text",columnDefinition = "Text")
     private String text;
 
     @Column(name = "right_ans")

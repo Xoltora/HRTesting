@@ -49,12 +49,13 @@ public class DataLoader implements CommandLineRunner {
             List<Role> roles = roleRepository.saveAll(Arrays.asList(
                     new Role(AuthoritiesConstants.ADMIN),
                     new Role(AuthoritiesConstants.Moderator),
-                    new Role(AuthoritiesConstants.CANDIDATE)
+                    new Role(AuthoritiesConstants.CANDIDATE),
+                    new Role(AuthoritiesConstants.Recruiter)
             ));
 
             userRepository.save(
                     new User("Begzod",
-                            passwordEncoder.encode("Begzod"),
+                            passwordEncoder.encode("2224802"),
                             "Baratov Begzod",
                             true,
                             new HashSet<>(Arrays.asList(roles.get(0), roles.get(1))),

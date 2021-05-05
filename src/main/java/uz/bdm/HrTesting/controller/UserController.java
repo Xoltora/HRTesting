@@ -3,6 +3,7 @@ package uz.bdm.HrTesting.controller;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.dto.ChangePasswordDto;
 import uz.bdm.HrTesting.dto.ResponseData;
@@ -52,6 +53,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping
     public HttpEntity<?> save(@Valid @RequestBody UserDto userDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = userService.save(userDto, userPrincipal);
@@ -62,6 +64,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PutMapping
     public HttpEntity<?> update(@Valid @RequestBody UserDto userDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = userService.update(userDto, userPrincipal);
@@ -73,6 +76,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable Long id) {
         ResponseData result = userService.deleteById(id);
@@ -84,6 +88,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PutMapping("/password")
     public HttpEntity<?> updatePassword(@CurrentUser UserPrincipal userPrincipal, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
         ResponseData result = userService.updatePassword(userPrincipal, changePasswordDto);

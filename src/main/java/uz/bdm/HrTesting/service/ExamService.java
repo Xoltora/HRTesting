@@ -28,7 +28,7 @@ public interface ExamService {
 
     ResponseData deleteById(Long id);
 
-    ResponseEntity findByState(ExamState examState, Long id, Date from, Date to, Integer page, Integer size);
+    ResponseEntity findByState(ExamState examState, Long id, String fio, Date from, Date to, Integer page, Integer size);
 
     ResponseData findResultById(Long id, UserPrincipal userPrincipal);
 

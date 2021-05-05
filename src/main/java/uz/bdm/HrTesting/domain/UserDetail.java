@@ -27,7 +27,7 @@ public class UserDetail extends AuditEntity implements Serializable {
     private Department department;
 
     @ManyToOne
-    private Recruiter recruiter;
+    private User recruiter;
 
     @Column(name = "password")
     private String password;

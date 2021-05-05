@@ -58,6 +58,11 @@ public class User extends AuditEntity implements Serializable {
     @JsonIgnore
     private Boolean isDeleted = false;
 
+    public User(Long id, @Size(max = 50) String fio) {
+        super.setId(id);
+        this.fio = fio;
+    }
+
     public UserDto mapToDto() {
         UserDto userDto = new UserDto();
 
