@@ -54,41 +54,36 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     void deleteById(@Param("id") Long id);
 
 
-    @Query(value = "with ansvers as (select ed.exam_id as exam_id,  ed.question_id , count(*) as ans_c  from exam_detail ed    " +
-            "          where ed.exam_id = :examId  " +
-            "          group by ed.question_id ,ed.exam_id ), " +
-            "          " +
-            "   ques as (select q.id  as question_id, q.count_right_ans, q.answer_type from question q  " +
-            "         RIGHT join test ON test.id = q.test_id " +
-            "         RIGHT join exam ON exam.test_id = test.id " +
-            "          where q.is_deleted is false and exam.id = :examId and test.is_deleted is false ), " +
-            "          " +
-            " written_count as (select * from question q right join ques qu on qu.question_id = q.id where q.answer_type = 'WRITTEN'),       " +
-            "           " +
-            "  count_question as (select count(*) from ques), " +
-            "          " +
-            "  marked as (select count(*) from ques q  " +
-            "        left join exam_detail ed on q.question_id = ed.question_id  " +
-            "        where ed.exam_id = :examId and q.answer_type != 'WRITTEN'  " +
-            "            group by q.question_id ), " +
-            "           " +
-            "        result as ( select a.exam_id , a.question_id , q.count_right_ans, " +
-            "           count(ed.selectable_ans_id) from ansvers a  " +
-            "             left join ques q using(question_id)  " +
-            "               left join exam_detail ed on a.question_id = ed.question_id and a.exam_id = ed.exam_id " +
-            "             left join selectable_answer se ON se.id = ed.selectable_ans_id  " +
-            "               where a.ans_c = q.count_right_ans  " +
-            "            and se.right_ans is true  " +
-            "         GROUP BY a.exam_id , a.question_id , q.count_right_ans " +
-            "          having  count(ed.selectable_ans_id) = q.count_right_ans) " +
-            "             " +
-            "      select * from count_question " +
-            "            union all " +
-            "      select count(*) from marked " +
-            "           union all " +
-            "      select count(*) from result " +
-            "          union all " +
-            "      select count(*) from written_count", nativeQuery = true)
+    @Query(value = "with ansvers as (select ed.exam_id as exam_id,  ed.question_id , count(*) as ans_c  from exam_detail ed" +
+            "                 where ed.exam_id = :examId" +
+            "                 group by ed.question_id ,ed.exam_id )," +
+            "     ques as (select q.id  as question_id, q.count_right_ans, q.answer_type from question q" +
+            "              RIGHT join test ON test.id = q.test_id" +
+            "              RIGHT join exam ON exam.test_id = test.id" +
+            "              where q.is_deleted is false and exam.id = :examId and test.is_deleted is false )," +
+            "    written_count as (select * from exam_detail ed  left join ques qu on qu.question_id = ed.question_id where qu.answer_type = 'WRITTEN'" +
+            "    and ed.exam_id = :examId and ed.is_deleted is false)," +
+            "    count_question as (select count(*) from ques)," +
+            "    marked as (select count(*) from ques q" +
+            "    left join exam_detail ed on q.question_id = ed.question_id" +
+            " where ed.exam_id = :examId and q.answer_type != 'WRITTEN'" +
+            " group by q.question_id )," +
+            "    result as ( select a.exam_id , a.question_id , q.count_right_ans," +
+            "    count(ed.selectable_ans_id) from ansvers a" +
+            "    left join ques q using(question_id)" +
+            "    left join exam_detail ed on a.question_id = ed.question_id and a.exam_id = ed.exam_id" +
+            "    left join selectable_answer se ON se.id = ed.selectable_ans_id" +
+            " where a.ans_c = q.count_right_ans" +
+            "  and se.right_ans is true" +
+            " GROUP BY a.exam_id , a.question_id , q.count_right_ans" +
+            " having  count(ed.selectable_ans_id) = q.count_right_ans)" +
+            " select * from count_question" +
+            " union all" +
+            " select count(*) from marked" +
+            " union all" +
+            " select count(*) from result" +
+            " union all" +
+            " select count(*) from written_count", nativeQuery = true)
     Object[] getResultExam(@Param("examId") Long examId);
 
     @Query("select e from Exam e left join e.test t left join t.department d where e.isDeleted = false AND e.state=:state and (:id is null or d.id=:id) and " +
