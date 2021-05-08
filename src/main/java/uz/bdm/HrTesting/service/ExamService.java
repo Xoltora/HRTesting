@@ -16,7 +16,7 @@ public interface ExamService {
 
     ResponseData info(Long id, UserPrincipal userPrincipal);
 
-    ResponseData startExam(Long examId, UserPrincipal userPrincipal);
+    ResponseData startExam(Long testId, UserPrincipal userPrincipal);
 
     ResponseData findById(Long id);
 
@@ -30,7 +30,7 @@ public interface ExamService {
 
     ResponseEntity findByState(ExamState examState, Long id, String fio, Date from, Date to, Integer page, Integer size);
 
-    ResponseData findResultById(Long id, UserPrincipal userPrincipal);
+    ResponseData findResultById(Long id, Integer attemptNumber, UserPrincipal userPrincipal);
 
     ResponseData findReportByExamId(Long id, UserPrincipal userPrincipal);
 
@@ -38,4 +38,6 @@ public interface ExamService {
 
     @Transactional
     ResponseData checkAnswer(CheckAnswerDto checkAnswerDto, UserPrincipal userPrincipal);
+
+    ResponseData findResultById(Long id, UserPrincipal userPrincipal);
 }

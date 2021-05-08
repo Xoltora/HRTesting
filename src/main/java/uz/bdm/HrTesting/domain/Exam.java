@@ -23,6 +23,7 @@ import java.util.Set;
 public class Exam extends AuditEntity implements Serializable {
 
     @OneToOne(mappedBy = "exam")
+    @JsonIgnore
     private ExamResult examResult;
 
     @ManyToOne
@@ -42,6 +43,9 @@ public class Exam extends AuditEntity implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private ExamState state;
+
+    @Column(name = "number_of_attempts")
+    private Integer numberOfAttempt;
 
     @Column(name = "is_deleted", nullable = false)
     @JsonIgnore
@@ -69,6 +73,7 @@ public class Exam extends AuditEntity implements Serializable {
         examInfoDto.setFinished(finished);
         examInfoDto.setId(super.getId());
         examInfoDto.setTestName(test.getName());
+        examInfoDto.setNumberOfAttempt(this.numberOfAttempt);
         examInfoDto.setResult(examResult!=null?examResult.mapToExamResultDto():null);
         return examInfoDto;
     }

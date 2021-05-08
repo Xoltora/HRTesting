@@ -88,11 +88,11 @@ public class ExamController {
         return examService.findByState(state, departmentId,fio,from,to,page,size);
     }
 
-    @GetMapping("/start/{examId}")
+    @GetMapping("/start/{testId}")
     @JsonView(value = View.QuestionWithAnswer.class)
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
-    public HttpEntity<?> startExam(@PathVariable Long examId, @CurrentUser UserPrincipal userPrincipal) {
-        ResponseData result = examService.startExam(examId, userPrincipal);
+    public HttpEntity<?> startExam(@PathVariable Long testId, @CurrentUser UserPrincipal userPrincipal) {
+        ResponseData result = examService.startExam(testId, userPrincipal);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);
@@ -125,17 +125,17 @@ public class ExamController {
         }
     }
 
-    @GetMapping("/result/by/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
-    public HttpEntity<?> resultById(@PathVariable Long id, UserPrincipal userPrincipal) {
-        ResponseData result = examService.findResultById(id, userPrincipal);
-
-        if (result.isAccept()) {
-            return ResponseEntity.status(HttpStatus.OK).body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
-    }
+//    @GetMapping("/result/by/{id}/{attemptNumber}")
+//    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+//    public HttpEntity<?> resultById(@PathVariable Long id, @PathVariable("attemptNumber") Integer attemptNumber,  UserPrincipal userPrincipal) {
+//        ResponseData result = examService.findResultById(id, attemptNumber, userPrincipal);
+//
+//        if (result.isAccept()) {
+//            return ResponseEntity.status(HttpStatus.OK).body(result);
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+//        }
+//    }
 
     @GetMapping("/report/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
@@ -173,4 +173,16 @@ public class ExamController {
         }
     }
 
+
+    @GetMapping("/result/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    public HttpEntity<?> resultTestById(@PathVariable Long id, UserPrincipal userPrincipal) {
+        ResponseData result = examService.findResultById(id, userPrincipal);
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
 }

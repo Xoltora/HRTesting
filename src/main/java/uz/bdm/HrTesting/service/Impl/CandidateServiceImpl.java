@@ -1,6 +1,5 @@
 package uz.bdm.HrTesting.service.Impl;
 
-import org.springframework.core.Constants;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,10 +15,7 @@ import uz.bdm.HrTesting.dto.CandidateDto;
 import uz.bdm.HrTesting.dto.ResponseData;
 import uz.bdm.HrTesting.dto.BaseDto;
 import uz.bdm.HrTesting.enums.ExamState;
-import uz.bdm.HrTesting.ropository.ExamRepository;
-import uz.bdm.HrTesting.ropository.TestSettingRepository;
-import uz.bdm.HrTesting.ropository.UserDetailRepository;
-import uz.bdm.HrTesting.ropository.UserRepository;
+import uz.bdm.HrTesting.ropository.*;
 import uz.bdm.HrTesting.service.CandidateService;
 import uz.bdm.HrTesting.service.ExamService;
 import uz.bdm.HrTesting.service.UserService;
@@ -38,14 +34,16 @@ public class CandidateServiceImpl implements CandidateService {
     private final UserService userService;
     private final TestSettingRepository testSettingRepository;
     private final ExamService examService;
+    private final UserTestRepository userTestRepository;
 
-    public CandidateServiceImpl(UserRepository userRepository, UserDetailRepository userDetailRepository, ExamRepository examRepository, UserService userService, TestSettingRepository testSettingRepository, ExamService examService) {
+    public CandidateServiceImpl(UserRepository userRepository, UserDetailRepository userDetailRepository, ExamRepository examRepository, UserService userService, TestSettingRepository testSettingRepository, ExamService examService, UserTestRepository userTestRepository) {
         this.userRepository = userRepository;
         this.userDetailRepository = userDetailRepository;
         this.examRepository = examRepository;
         this.userService = userService;
         this.testSettingRepository = testSettingRepository;
         this.examService = examService;
+        this.userTestRepository = userTestRepository;
     }
 
     @Override
@@ -146,22 +144,29 @@ public class CandidateServiceImpl implements CandidateService {
             UserDetail saveUserDetail = userDetailRepository.save(userDetail);
 
             if (candidateDto.getTests() != null) {
-                List<Exam> examList = new ArrayList<>();
+                List<UserTest> userTests = new ArrayList<>();
 
                 for (BaseDto test : candidateDto.getTests()) {
                     TestSetting testSetting = testSettingRepository.findByTestId(test.getId()).orElse(null);
 
-                    for (Integer i = 0; i < testSetting.getNumberOfAttempts(); i++) {
-                        examList.add(new Exam(
-                                save,
-                                test.mapToEntity(),
-                                testSetting.getTime(),
-                                ExamState.NOT_STARTED
-                        ));
-                    }
+//                    for (Integer i = 0; i < testSetting.getNumberOfAttempts(); i++) {
+//                        examList.add(new Exam(
+//                                save,
+//                                test.mapToEntity(),
+//                                testSetting.getTime(),
+//                                ExamState.NOT_STARTED
+//                        ));
+//                    }
+                    userTests.add(new UserTest(
+                                        save,
+                                        new Test(test.getId()),
+                                        testSetting.getNumberOfAttempts(),
+                                        0,
+                                        0));
                 }
 
-                examRepository.saveAll(examList);
+                userTestRepository.saveAll(userTests);
+//                examRepository.saveAll(examList);
             }
             CandidateDto saveDto = save.mapToCandidateDto(saveUserDetail);
 

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uz.bdm.HrTesting.domain.Exam;
+import uz.bdm.HrTesting.domain.Test;
+import uz.bdm.HrTesting.domain.User;
 import uz.bdm.HrTesting.dto.BaseDto;
 import uz.bdm.HrTesting.enums.ExamState;
 
@@ -152,4 +154,11 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             "                                                  left join written w using(question_id) " +
             "              order by question_id" ,nativeQuery = true)
     List<Object[]> findReportByExamId(@Param("examId") Long examId);
+
+    @Query("SELECT e from Exam e where e.test.id = :testId and e.user.id = :userId and e.numberOfAttempt = :attemptNumber")
+    Exam findByTestAndUserAndNumberOfAttempt(@Param("testId") Long testId, @Param("userId") Long userId, @Param("attemptNumber") Integer attemptNumber);
+
+    @Query("SELECT e.id from Exam e where e.test.id = :testId and e.user.id = :userId")
+    List<Long> findByTestAndUserAndNumber(@Param("testId") Long testId, @Param("userId") Long userId);
+
 }

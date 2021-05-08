@@ -25,4 +25,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResult,Long> {
             "group by re.id, re.fio",nativeQuery = true)
     List<Object[]> findByDateReport(@Param("fromDate") @Temporal Date fromDate,
                                     @Param("toDate") @Temporal Date toDate);
+
+    @Query("SELECT er from ExamResult er left join er.exam e on e.id = er.exam.id where e.user.id = :userId and e.test.id = :testId")
+    List<ExamResult> findAllByExamId(@Param("testId") Long testId, @Param("userId") Long userId);
 }

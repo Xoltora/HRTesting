@@ -39,7 +39,7 @@ public class ExamInfoDto {
 
     private ExamResultDto result;
 
-
+    private Integer numberOfAttempt;
 
 
 }

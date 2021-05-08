@@ -39,8 +39,10 @@ public class ExamServiceImpl implements ExamService {
     private final SelectableAnswerRepository selectableAnswerRepository;
     private final ExamResultRepository examResultRepository;
     private final FinishExamService finishExamService;
+    private final TestRepository testRepository;
+    private final UserTestRepository userTestRepository;
 
-    public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository, ExamResultRepository examResultRepository, FinishExamService finishExamService) {
+    public ExamServiceImpl(ExamRepository examRepository, ExamDetailRepository examDetailRepository, TestSettingRepository testSettingRepository, QuestionRepository questionRepository, QuestionService questionService, SelectableAnswerRepository selectableAnswerRepository, ExamResultRepository examResultRepository, FinishExamService finishExamService, TestRepository testRepository, UserTestRepository userTestRepository) {
         this.examRepository = examRepository;
         this.examDetailRepository = examDetailRepository;
         this.testSettingRepository = testSettingRepository;
@@ -49,6 +51,8 @@ public class ExamServiceImpl implements ExamService {
         this.selectableAnswerRepository = selectableAnswerRepository;
         this.examResultRepository = examResultRepository;
         this.finishExamService = finishExamService;
+        this.testRepository = testRepository;
+        this.userTestRepository = userTestRepository;
     }
 
     @Override
@@ -57,14 +61,31 @@ public class ExamServiceImpl implements ExamService {
 
         try {
 
-            List<Exam> allTest = examRepository.findAllTestByUserIdStateNot(userPrincipal.getId(), ExamState.ON_PROCESS);
+//            List<UserTest> tests1 = userTestRepository.findAllByStateNotProcess(userPrincipal.getId());
+//
+//            List<Map<String, Object>> collect1 = tests1.stream().map(
+//                    userTest -> {
+//                        Map<String, Object> map = new LinkedHashMap<>();
+//                        map.put("id", userTest.getId());
+//                        map.put("name", userTest.getTest().getName());
+//                        map.put("numberOfAttempts", userTest.getNumberOfAttempts());
+//                        map.put("completedAttempts", userTest.getCompletedAttempts());
+////                        map.put("state", exam.getState());
+//                        return map;
+//                    }
+//            ).collect(Collectors.toList());
+
+            List<UserTest> allTest = userTestRepository.findAllByStateNotStarted(userPrincipal.getId());
 
             List<Map<String, Object>> collect = allTest.stream().map(
-                    exam -> {
+                    userTest -> {
                         Map<String, Object> map = new LinkedHashMap<>();
-                        map.put("id", exam.getId());
-                        map.put("name", exam.getTest().getName());
-                        map.put("state", exam.getState());
+                        map.put("id", userTest.getId());
+                        map.put("name", userTest.getTest().getName());
+                        map.put("numberOfAttempts", userTest.getNumberOfAttempts());
+                        map.put("completedOfAttempts", userTest.getNumberOfAttempts() - userTest.getCompletedAttempts());
+                        map.put("percent", userTest.getPercent());
+//                        map.put("state", ExamState.NOT_STARTED);
                         return map;
                     }
             ).collect(Collectors.toList());
@@ -180,34 +201,54 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public ResponseData startExam(Long examId, UserPrincipal userPrincipal) {
+    public ResponseData startExam(Long testId, UserPrincipal userPrincipal) {
         ResponseData result = new ResponseData();
 
         Map<String, Object> test = new HashMap<>();
 
-        Exam exam = examRepository.findById(examId).orElse(null);
+//        Exam exam = examRepository.findById(examId).orElse(null);
+        Test test1 = testRepository.findById(testId).orElse(null);
 
-        if (exam == null) {
+        TestSetting testSetting = testSettingRepository.findByTestId(testId).orElse(null);
+
+        if (test1 == null || testSetting == null) {
             result.setAccept(false);
-            result.setMessage("Экзамен не найден ID = " + examId);
+            result.setMessage("Экзамен не найден ID = " + testId);
             return result;
         }
 
         try {
-            ResponseData allWithAnswer = questionService.findAllWithAnswer(exam.getTest().getId());
+            ResponseData allWithAnswer = questionService.findAllWithAnswer(testId);
 
             if (!allWithAnswer.isAccept()) return allWithAnswer;
 
-            test.put("id", examId);
-            test.put("time", exam.getTime());
-            test.put("questions", allWithAnswer.getData());
-            test.put("name", exam.getTest().getName());
+            UserTest userTest = userTestRepository.findByTestAndUser(test1, userPrincipal.getUserDetail().getUser());
+
+            if (userTest.getNumberOfAttempts().equals(userTest.getCompletedAttempts())){
+                result.setAccept(false);
+                result.setMessage("У Вас больше нет попытки ");
+                return result;
+            }
+
+            userTest.setCompletedAttempts(userTest.getCompletedAttempts() + 1);
+
+            Exam exam = new Exam(userPrincipal.getUserDetail().getUser(),
+                    test1,
+                    testSetting.getTime(),
+                    ExamState.ON_PROCESS);
+            exam.setNumberOfAttempt(userTest.getCompletedAttempts());
+
             Date currentDate = new Date();
-            test.put("started", currentDate);
 
             exam.setStarted(currentDate);
-            exam.setState(ExamState.ON_PROCESS);
-            examRepository.save(exam);
+
+            Exam savedExam = examRepository.save(exam);
+
+            test.put("id", savedExam.getId());
+            test.put("time", savedExam.getTime());
+            test.put("questions", allWithAnswer.getData());
+            test.put("name", savedExam.getTest().getName());
+            test.put("started", currentDate);
 
             finishExamService.finishExam(exam);
 
@@ -370,6 +411,16 @@ public class ExamServiceImpl implements ExamService {
             ExamResult examResult = examResultDto.mapToEntity();
             examResult.setExam(new Exam(exam.getId()));
 
+            UserTest userTest = userTestRepository.findByTestAndUser(exam.getTest(), exam.getUser());
+
+
+            /*
+             UserTest entity ga percent save qilmoqda
+             */
+            userTest.setPercent(percent > userTest.getPercent() ? percent.intValue() : userTest.getPercent());
+
+            userTestRepository.save(userTest);
+
             examResultRepository.save(examResult);
 
             Date currentDate = new Date();
@@ -439,10 +490,19 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public ResponseData findResultById(Long id, UserPrincipal userPrincipal) {
+    public ResponseData findResultById(Long id, Integer attemptNumber, UserPrincipal userPrincipal) {
         ResponseData result = new ResponseData();
         try {
-            ExamResult examResult = examResultRepository.findByExamId(id).orElse(null);
+
+            Exam exam = examRepository.findByTestAndUserAndNumberOfAttempt(id, userPrincipal.getId(), attemptNumber);
+
+            if (exam == null) {
+                result.setAccept(false);
+                result.setMessage("Тест не найден ID = " + id);
+                return result;
+            }
+
+            ExamResult examResult = examResultRepository.findByExamId(exam.getId()).orElse(null);
 
             if (examResult == null) {
                 result.setAccept(false);
@@ -464,6 +524,7 @@ public class ExamServiceImpl implements ExamService {
         ResponseData result = new ResponseData();
 
         try {
+//            Exam exam = examRepository.findByTestAndUserAndNumberOfAttempt(id, userId, attemptNumber);
             List<Object[]> reportByExamId = examRepository.findReportByExamId(id);
             List<QuestionReportDto> questionReportDtoList = new ArrayList<>();
 
@@ -602,6 +663,25 @@ public class ExamServiceImpl implements ExamService {
             result.setAccept(false);
             result.setMessage("Error find questions!");
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return result;
+    }
+
+    @Override
+    public ResponseData findResultById(Long id, UserPrincipal userPrincipal) {
+        ResponseData result = new ResponseData();
+
+        try {
+            List<ExamResult> examResultList = examResultRepository.findAllByExamId(id, userPrincipal.getId());
+
+            result.setData(examResultList
+                    .stream()
+                    .map(ExamResult::mapToExamResultDto)
+                    .collect(Collectors.toList()));
+            result.setAccept(true);
+        }catch (Exception e){
+            result.setMessage("Error find!");
+            result.setAccept(false);
         }
         return result;
     }

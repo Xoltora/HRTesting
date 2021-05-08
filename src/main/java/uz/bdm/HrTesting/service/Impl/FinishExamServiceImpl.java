@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.Exam;
 import uz.bdm.HrTesting.domain.ExamResult;
+import uz.bdm.HrTesting.domain.UserTest;
 import uz.bdm.HrTesting.dto.ExamResultDto;
 import uz.bdm.HrTesting.enums.ExamState;
 import uz.bdm.HrTesting.ropository.ExamRepository;
 import uz.bdm.HrTesting.ropository.ExamResultRepository;
+import uz.bdm.HrTesting.ropository.UserTestRepository;
 import uz.bdm.HrTesting.service.FinishExamService;
 
 import javax.transaction.Transactional;
@@ -20,10 +22,12 @@ public class FinishExamServiceImpl implements FinishExamService {
 
     private final ExamRepository examRepository;
     private final ExamResultRepository examResultRepository;
+    private final UserTestRepository userTestRepository;
 
-    public FinishExamServiceImpl(ExamRepository examRepository, ExamResultRepository examResultRepository) {
+    public FinishExamServiceImpl(ExamRepository examRepository, ExamResultRepository examResultRepository, UserTestRepository userTestRepository) {
         this.examRepository = examRepository;
         this.examResultRepository = examResultRepository;
+        this.userTestRepository = userTestRepository;
     }
 
     @Async("asyncExecutor")
@@ -56,6 +60,12 @@ public class FinishExamServiceImpl implements FinishExamService {
 
                 ExamResult examResult = examResultDto.mapToEntity();
                 examResult.setExam(new Exam(exam.getId()));
+
+                UserTest userTest = userTestRepository.findByTestAndUser(exam.getTest(), exam.getUser());
+
+                userTest.setPercent(percent > userTest.getPercent() ? percent.intValue() : userTest.getPercent());
+
+                userTestRepository.save(userTest);
 
                 examResultRepository.save(examResult);
 
