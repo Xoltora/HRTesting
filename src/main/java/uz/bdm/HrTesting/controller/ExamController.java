@@ -29,7 +29,7 @@ public class ExamController {
         this.examService = examService;
     }
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findAll(userPrincipal);
 
@@ -41,7 +41,7 @@ public class ExamController {
     }
 
     @GetMapping("/info/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> info(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.info(id, userPrincipal);
 
@@ -53,7 +53,7 @@ public class ExamController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> findById(@PathVariable Long id) {
         ResponseData result = examService.findById(id);
 
@@ -65,7 +65,7 @@ public class ExamController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> deleteById(@PathVariable("id") Long id){
         ResponseData result = examService.deleteById(id);
 
@@ -77,7 +77,7 @@ public class ExamController {
     }
 
     @GetMapping("/result/{state}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> byState(@PathVariable ExamState state,
                                  @RequestParam(value = "departmentId",required = false) Long departmentId,
                                  @RequestParam(value = "fio",required = false) String fio,
@@ -90,7 +90,7 @@ public class ExamController {
 
     @GetMapping("/start/{examId}")
     @JsonView(value = View.QuestionWithAnswer.class)
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> startExam(@PathVariable Long examId, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.startExam(examId, userPrincipal);
 
@@ -102,7 +102,7 @@ public class ExamController {
     }
 
     @PostMapping("/answer")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> saveAnswer(@RequestBody ExamAnswerDto examAnswerDto, UserPrincipal userPrincipal) {
         ResponseData result = examService.saveAnswer(examAnswerDto, userPrincipal);
 
@@ -114,7 +114,7 @@ public class ExamController {
     }
 
     @GetMapping("/finish/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> finish(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.finish(id, userPrincipal);
 
@@ -126,7 +126,7 @@ public class ExamController {
     }
 
     @GetMapping("/result/by/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> resultById(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.findResultById(id, userPrincipal);
 
@@ -138,7 +138,7 @@ public class ExamController {
     }
 
     @GetMapping("/report/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> reportByExamId(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.findReportByExamId(id, userPrincipal);
 
@@ -150,7 +150,7 @@ public class ExamController {
     }
 
     @GetMapping("/question/for-check/{examId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> forCheckQuestion(@PathVariable Long examId, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findForCheckQuestion(examId, userPrincipal);
 
@@ -162,7 +162,7 @@ public class ExamController {
     }
 
     @PostMapping("/check/answer")
-    @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> checkAnswer(@Valid @RequestBody CheckAnswerDto checkAnswerDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.checkAnswer(checkAnswerDto, userPrincipal);
 
