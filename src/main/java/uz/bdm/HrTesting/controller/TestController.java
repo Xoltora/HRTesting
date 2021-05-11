@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.domain.model.TestFiltr;
 import uz.bdm.HrTesting.dto.ResponseData;
@@ -32,6 +33,7 @@ public class TestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public  HttpEntity<?> findAll(@RequestParam(value = "from",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
                                   @RequestParam(value = "to",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
                                   @RequestParam(value = "departmentId",required = false) List<Long> departmentId,
@@ -41,6 +43,7 @@ public class TestController {
     }
 
     @GetMapping("/list/short")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> findAllShort(@RequestParam(value = "departmentId") Long departmentId){
         ResponseData result = testService.findAllShort(departmentId);
 
@@ -52,6 +55,7 @@ public class TestController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> findById(@PathVariable Long id) {
         ResponseData result = testService.findById(id);
 
@@ -63,6 +67,7 @@ public class TestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> save(@Valid @RequestBody TestDto testDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = testService.save(testDto, userPrincipal);
 
@@ -74,6 +79,7 @@ public class TestController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public  HttpEntity<?> delete(@PathVariable Long id){
         ResponseData result = testService.delete(id);
 
@@ -85,6 +91,7 @@ public class TestController {
     }
 
     @PutMapping("/name")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public  HttpEntity<?> name(@Valid @NotNull Long testId,  @NotBlank @RequestParam String name){
         ResponseData result = testService.updateName(testId, name);
 
@@ -96,6 +103,7 @@ public class TestController {
     }
 
     @GetMapping("/title/screen/{testId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> titleScreen(@PathVariable Long testId) {
         ResponseData result = testService.findTitleScreenByTestId(testId);
 
@@ -107,6 +115,7 @@ public class TestController {
     }
 
     @PostMapping("/title/screen")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> titleScreen(@Valid @RequestBody TitleScreenDto titleScreenDto) {
         ResponseData result = testService.saveTitleScreen(titleScreenDto);
 
@@ -118,6 +127,7 @@ public class TestController {
     }
 
     @PutMapping("/title/screen")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> updateTitleScreen(@Valid @RequestBody TitleScreenDto titleScreenDto) {
         ResponseData result = testService.updateTitleScreen(titleScreenDto);
 
@@ -129,6 +139,7 @@ public class TestController {
     }
 
     @PutMapping("/setting")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR')")
     public HttpEntity<?> updateSetting(@Valid @RequestBody TestSettingDto testSettingDto) {
         ResponseData result = testService.updateSetting(testSettingDto);
 
@@ -140,6 +151,7 @@ public class TestController {
     }
 
     @GetMapping("/setting/{testId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> findSettingByTestId(@PathVariable Long testId) {
         ResponseData result = testService.findSettingByTestId(testId);
 

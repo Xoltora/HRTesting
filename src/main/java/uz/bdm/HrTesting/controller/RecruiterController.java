@@ -3,6 +3,7 @@ package uz.bdm.HrTesting.controller;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.bdm.HrTesting.dto.RecruiterDto;
 import uz.bdm.HrTesting.dto.ResponseData;
@@ -23,6 +24,7 @@ public class RecruiterController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> findAllList(@CurrentUser UserPrincipal userPrincipal) {
         return userService.findAllRecruiter(userPrincipal);
     }

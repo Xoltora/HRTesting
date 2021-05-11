@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService {
 
             ResponseData byName = roleService.findByName(AuthoritiesConstants.CANDIDATE);
 //            Set<Role> set = new HashSet(Arrays.asList(byName.getData()));
-            Page<User> all = userRepository.findAllNotId(4L, pageable);
+            Page<User> all = userRepository.findAllNotId(userPrincipal.getId(), pageable);   //// id = 4L -> userPrincipal.getId()
 
             httpHeaders.add("page", String.valueOf(all.getNumber()));
             httpHeaders.add("size", String.valueOf(all.getSize()));

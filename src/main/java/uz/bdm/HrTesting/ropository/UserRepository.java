@@ -30,7 +30,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
   @Query(value = " select * from u_user u where id in   " +
           "(select user_id from user_authority   " +
           " where authority_name = 'ROLE_RECRUITER')  " +
-          "and u.is_deleted = false and u.id <> :id  ORDER BY u.id DESC" ,nativeQuery = true)
+          "and u.is_deleted = false ORDER BY u.id DESC" ,nativeQuery = true) ////  and u.id <> :id
   List<User> findAllRecruiter(@Param("id") Long id);
 
   @Modifying
