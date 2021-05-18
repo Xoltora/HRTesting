@@ -174,7 +174,7 @@ public class ExamController {
     }
 
 
-    @GetMapping("/result/{id}")
+    @GetMapping("/resultTest/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> resultTestById(@PathVariable Long id, UserPrincipal userPrincipal) {
         ResponseData result = examService.findResultById(id, userPrincipal);

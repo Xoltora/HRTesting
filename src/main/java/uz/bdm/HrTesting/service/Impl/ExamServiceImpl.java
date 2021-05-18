@@ -470,6 +470,20 @@ public class ExamServiceImpl implements ExamService {
 //        httpHeaders.add("page",String.valueOf(page));
 //        httpHeaders.add("size",String.valueOf(size));
         try {
+            if (examState == ExamState.NOT_STARTED){
+                Page<UserTest> userTests = userTestRepository.findByNotStarted(id, fio, from, to, pageable);
+                httpHeaders.add("page", String.valueOf(userTests.getNumber()));
+                httpHeaders.add("size", String.valueOf(userTests.getSize()));
+                httpHeaders.add("totalPages", String.valueOf(userTests.getTotalPages()));
+
+                List<UserTestDto> userTestDtoList = userTests.getContent()
+                        .stream()
+                        .map(userTest -> userTest.mapToDto())
+                        .collect(Collectors.toList());
+                responseData.setAccept(true);
+                responseData.setData(userTestDtoList);
+                return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
+            }
             Page<Exam> examPage = examRepository.findByState(examState, id, fio, from, to, pageable);
             httpHeaders.add("page", String.valueOf(examPage.getNumber()));
             httpHeaders.add("size", String.valueOf(examPage.getSize()));

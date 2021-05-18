@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.bdm.HrTesting.audit.AuditEntity;
+import uz.bdm.HrTesting.dto.UserTestDto;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,4 +37,22 @@ public class UserTest extends AuditEntity implements Serializable {
 
     @Column(name = "percent")
     private Integer percent;
+
+    public UserTestDto mapToDto(){
+        UserTestDto dto = new UserTestDto();
+
+        if (this.user != null) {
+            dto.setUser(this.user.mapToDto());
+        }
+
+        if (this.test != null){
+            dto.setTest(this.test.mapToDto());
+        }
+
+        dto.setNumberOfAttempts(this.numberOfAttempts);
+
+        dto.setCompletedAttempts(this.numberOfAttempts - this.completedAttempts);
+
+        return dto;
+    }
 }
