@@ -9,8 +9,6 @@ import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uz.bdm.HrTesting.domain.Exam;
-import uz.bdm.HrTesting.domain.Test;
-import uz.bdm.HrTesting.domain.User;
 import uz.bdm.HrTesting.dto.BaseDto;
 import uz.bdm.HrTesting.enums.ExamState;
 
@@ -88,15 +86,16 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             " select count(*) from written_count", nativeQuery = true)
     Object[] getResultExam(@Param("examId") Long examId);
 
-    @Query("select e from Exam e left join e.test t left join t.department d where e.isDeleted = false AND e.state=:state and (:id is null or d.id=:id) and " +
+    @Query("select e from Exam e left join e.test t left join t.department d where e.isDeleted = false AND e.user.id = :userId AND e.test.id = :testId AND e.state=:state and (:id is null or d.id=:id) and " +
             " ((cast(:fromDate as date) is null or cast(:toDate as date) is null) or (cast(:fromDate as date) <= e.created " +
             " AND cast(:toDate as date) >= e.created)) and (:fio is null OR lower(e.user.fio) like lower(concat('%',cast(:fio as text),'%')))  ORDER BY e.id DESC")
-      Page<Exam> findByState(@Param("state") ExamState examState,
+      List<Exam> findByState(@Param("state") ExamState examState,
+                           @Param("testId") Long testId,
+                           @Param("userId") Long userId,
                            @Param("id") Long id,
                            @Param("fio") String fio,
                            @Param("fromDate") @Temporal Date fromDate,
-                           @Param("toDate") @Temporal Date toDate,
-                           Pageable pageable);
+                           @Param("toDate") @Temporal Date toDate);
 
 
 
@@ -158,7 +157,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     @Query("SELECT e from Exam e where e.test.id = :testId and e.user.id = :userId and e.numberOfAttempt = :attemptNumber")
     Exam findByTestAndUserAndNumberOfAttempt(@Param("testId") Long testId, @Param("userId") Long userId, @Param("attemptNumber") Integer attemptNumber);
 
-    @Query("SELECT e.id from Exam e where e.test.id = :testId and e.user.id = :userId")
-    List<Long> findByTestAndUserAndNumber(@Param("testId") Long testId, @Param("userId") Long userId);
+    @Query("SELECT e from Exam e where e.test.id = :testId and e.user.id = :userId")
+    List<Exam> findByTestAndUserAndNumber(@Param("testId") Long testId, @Param("userId") Long userId);
 
 }

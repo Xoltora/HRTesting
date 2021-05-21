@@ -62,20 +62,20 @@ public class Exam extends AuditEntity implements Serializable {
         super.setId(id);
     }
 
-    public ExamInfoDto mapToExamInfoDto() {
-        ExamInfoDto examInfoDto = new ExamInfoDto();
-        examInfoDto.setCreated(super.getCreated());
-        examInfoDto.setDepartmentId(test.getDepartment().getId());
-        examInfoDto.setUserId(user.getId());
-        examInfoDto.setFio(user.getFio());
-        examInfoDto.setDepartmentName(test.getDepartment().getName());
-        examInfoDto.setStarted(started);
-        examInfoDto.setFinished(finished);
-        examInfoDto.setId(super.getId());
-        examInfoDto.setTestName(test.getName());
-        examInfoDto.setNumberOfAttempt(this.numberOfAttempt);
-        examInfoDto.setResult(examResult!=null?examResult.mapToExamResultDto():null);
-        return examInfoDto;
-    }
+//    public ExamInfoDto mapToExamInfoDto() {
+//        ExamInfoDto examInfoDto = new ExamInfoDto();
+//        examInfoDto.setCreated(super.getCreated());
+//        examInfoDto.setDepartmentId(test.getDepartment().getId());
+//        examInfoDto.setUserId(user.getId());
+//        examInfoDto.setFio(user.getFio());
+//        examInfoDto.setDepartmentName(test.getDepartment().getName());
+//        examInfoDto.setStarted(started);
+//        examInfoDto.setFinished(finished);
+//        examInfoDto.setId(super.getId());
+//        examInfoDto.setTestName(test.getName());
+//        examInfoDto.setNumberOfAttempt(this.numberOfAttempt);
+//        examInfoDto.setResult(examResult!=null?examResult.mapToExamResultDto():null);
+//        return examInfoDto;
+//    }
 
 }

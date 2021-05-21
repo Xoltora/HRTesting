@@ -103,7 +103,7 @@ public class ExamController {
 
     @PostMapping("/answer")
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
-    public HttpEntity<?> saveAnswer(@RequestBody ExamAnswerDto examAnswerDto, UserPrincipal userPrincipal) {
+    public HttpEntity<?> saveAnswer(@RequestBody ExamAnswerDto examAnswerDto, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.saveAnswer(examAnswerDto, userPrincipal);
 
         if (result.isAccept()) {
@@ -115,7 +115,7 @@ public class ExamController {
 
     @GetMapping("/finish/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
-    public HttpEntity<?> finish(@PathVariable Long id, UserPrincipal userPrincipal) {
+    public HttpEntity<?> finish(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.finish(id, userPrincipal);
 
         if (result.isAccept()) {
@@ -139,7 +139,7 @@ public class ExamController {
 
     @GetMapping("/report/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
-    public HttpEntity<?> reportByExamId(@PathVariable Long id, UserPrincipal userPrincipal) {
+    public HttpEntity<?> reportByExamId(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findReportByExamId(id, userPrincipal);
 
         if (result.isAccept()) {
@@ -176,7 +176,7 @@ public class ExamController {
 
     @GetMapping("/resultTest/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
-    public HttpEntity<?> resultTestById(@PathVariable Long id, UserPrincipal userPrincipal) {
+    public HttpEntity<?> resultTestById(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findResultById(id, userPrincipal);
 
         if (result.isAccept()) {

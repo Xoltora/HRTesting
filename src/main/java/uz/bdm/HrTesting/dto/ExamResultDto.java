@@ -30,6 +30,8 @@ public class ExamResultDto {
 
     private String time;
 
+    private Integer attempt;
+
     public ExamResult mapToEntity(){
         ExamResult examResult = new ExamResult();
         examResult.setCountQuestion(this.countQuestion);

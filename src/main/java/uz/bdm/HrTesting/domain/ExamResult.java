@@ -47,6 +47,7 @@ public class ExamResult extends AuditEntity implements Serializable {
         examResultDto.setCountUnchecked(countUnchecked);
         examResultDto.setCountWrong(countWrong);
         examResultDto.setPercent(percent);
+        examResultDto.setAttempt(this.exam.getNumberOfAttempt());
         return examResultDto;
     }
 }

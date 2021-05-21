@@ -13,6 +13,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import uz.bdm.HrTesting.domain.*;
 import uz.bdm.HrTesting.dto.*;
 import uz.bdm.HrTesting.dto.exam.ExamAnswerDto;
+import uz.bdm.HrTesting.dto.exam.ExamInfoAttemptDto;
 import uz.bdm.HrTesting.dto.exam.ExamInfoDto;
 import uz.bdm.HrTesting.enums.AnswerType;
 import uz.bdm.HrTesting.enums.ExamState;
@@ -79,13 +80,19 @@ public class ExamServiceImpl implements ExamService {
 
             List<Map<String, Object>> collect = allTest.stream().map(
                     userTest -> {
+                        TestSetting testSetting = testSettingRepository.findByTestId(userTest.getTest().getId()).orElse(null);
                         Map<String, Object> map = new LinkedHashMap<>();
                         map.put("id", userTest.getId());
                         map.put("name", userTest.getTest().getName());
                         map.put("numberOfAttempts", userTest.getNumberOfAttempts());
-                        map.put("completedOfAttempts", userTest.getNumberOfAttempts() - userTest.getCompletedAttempts());
+                        map.put("notStartedOfAttempts", userTest.getNumberOfAttempts() - userTest.getCompletedAttempts());
                         map.put("percent", userTest.getPercent());
-//                        map.put("state", ExamState.NOT_STARTED);
+                        map.put("description", testSetting.getDescription());
+                        map.put("title", testSetting.getTitle());
+                        map.put("time", testSetting.getTime());
+                        if (userTest.getNumberOfAttempts() - userTest.getCompletedAttempts() == 0){
+                            map.put("state", ExamState.FINISHED);
+                        } else map.put("state", ExamState.NOT_STARTED);
                         return map;
                     }
             ).collect(Collectors.toList());
@@ -484,16 +491,56 @@ public class ExamServiceImpl implements ExamService {
                 responseData.setData(userTestDtoList);
                 return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(responseData);
             }
-            Page<Exam> examPage = examRepository.findByState(examState, id, fio, from, to, pageable);
-            httpHeaders.add("page", String.valueOf(examPage.getNumber()));
-            httpHeaders.add("size", String.valueOf(examPage.getSize()));
-            httpHeaders.add("totalPages", String.valueOf(examPage.getTotalPages()));
-            List<ExamInfoDto> examDtoList = examPage.getContent()
-                    .stream()
-                    .map(exam -> exam.mapToExamInfoDto())
-                    .collect(Collectors.toList());
+
+            Page<UserTest> userTests = userTestRepository.findAllByStateNotProcess(pageable);
+            httpHeaders.add("page", String.valueOf(userTests.getNumber()));
+            httpHeaders.add("size", String.valueOf(userTests.getSize()));
+            httpHeaders.add("totalPages", String.valueOf(userTests.getTotalPages()));
+
+            List<ExamInfoDto> examInfoDtos = null;
+
+            for (int i = 0; i < userTests.getContent().size(); i++) {
+                List<Exam> examList = examRepository.findByState(examState, userTests.getContent().get(i).getTest().getId(), userTests.getContent().get(i).getUser().getId(),
+                        id, fio, from, to);
+                if (examList .size() == 0){
+                    continue;
+                }
+                ExamInfoDto examInfoDto = new ExamInfoDto();
+                if (examList.size() > 0) {
+                    examInfoDto.setUserId(examList.get(0).getUser().getId());
+                    examInfoDto.setFio(examList.get(0).getUser().getFio());
+                    examInfoDto.setDepartmentId(examList.get(0).getTest().getDepartment().getId());
+                    examInfoDto.setDepartmentName(examList.get(0).getTest().getDepartment().getName());
+                    examInfoDto.setTestName(examList.get(0).getTest().getName());
+                }
+                List<ExamInfoDto> collect = new ArrayList<>();
+                for (int i1 = 0; i1 < examList.size(); i1++) {
+                    examInfoDto.mapToDto(examList.get(i1));
+                }
+
+                collect.add(examInfoDto);
+
+            if (examInfoDtos == null){
+                    examInfoDtos = collect;
+                } else examInfoDtos.addAll(collect);
+            }
+
             responseData.setAccept(true);
-            responseData.setData(examDtoList);
+            responseData.setData(examInfoDtos);
+
+
+//            Page<Exam> examPage = examRepository.findByState(examState, id, fio, from, to, pageable);
+//            httpHeaders.add("page", String.valueOf(examPage.getNumber()));
+//            httpHeaders.add("size", String.valueOf(examPage.getSize()));
+//            httpHeaders.add("totalPages", String.valueOf(examPage.getTotalPages()));
+//            List<ExamInfoDto> examDtoList = examPage.getContent()
+//                    .stream()
+//                    .map(exam -> exam.mapToExamInfoDto())
+//                    .collect(Collectors.toList());
+//            responseData.setAccept(true);
+//            responseData.setData(examDtoList);
+
+
         } catch (Exception e) {
             e.printStackTrace();
             responseData.setAccept(false);

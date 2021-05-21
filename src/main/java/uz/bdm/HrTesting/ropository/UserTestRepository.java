@@ -19,8 +19,7 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
 
     UserTest findByTestAndUser(Test test, User user);
 
-    @Query("SELECT ut from UserTest ut WHERE ut.user.id = :id AND ut.test.id NOT IN (SELECT e.test.id from Exam e WHERE e.state = 'ON_PROCESS')\n" +
-            "AND ut.user.id NOT IN (SELECT e.user.id from Exam e WHERE e.state = 'ON_PROCESS')")
+    @Query("SELECT ut from UserTest ut WHERE ut.user.id = :id AND ut.test.id NOT IN (SELECT e.test.id from Exam e WHERE e.state = 'ON_PROCESS' AND e.user.id = ut.user.id)")
     List<UserTest> findAllByStateNotStarted(@Param("id") Long id);
 
     @Query("SELECT ut FROM UserTest ut LEFT JOIN ut.test t LEFT JOIN t.department d WHERE t.isDeleted = false AND ut.numberOfAttempts - ut.completedAttempts <> 0 AND (:id is null or d.id=:id) AND " +
@@ -33,6 +32,6 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
                                     Pageable pageable);
 
 
-//    @Query("select ut from UserTest ut where ut.test.id not in (SELECT e.test.id from Exam e WHERE e.state <> 'ON_PROCESS') and ut.user.id = :id")
-//    List<UserTest> findAllByStateNotProcess(@Param("id") Long id);
+    @Query("select ut from UserTest ut where ut.test.id not in (SELECT e.test.id from Exam e WHERE e.state = 'ON_PROCESS' and e.user.id = ut.user.id)")
+    Page<UserTest> findAllByStateNotProcess(Pageable pageable);
 }
