@@ -86,7 +86,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/**", "/question/**").permitAll()
+                .antMatchers("/auth/**", "/question/**", "/statistics/**").permitAll()
                 .antMatchers("/candidate/**","/report/**").hasAnyAuthority(AuthoritiesConstants.Moderator,AuthoritiesConstants.Recruiter)
                 .antMatchers( "/recruiter/**", "/department/**","/role/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .anyRequest().authenticated()

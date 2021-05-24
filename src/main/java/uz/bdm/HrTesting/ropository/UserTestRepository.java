@@ -34,4 +34,12 @@ public interface UserTestRepository extends JpaRepository<UserTest, Long> {
 
     @Query("select ut from UserTest ut where ut.test.id not in (SELECT e.test.id from Exam e WHERE e.state = 'ON_PROCESS' and e.user.id = ut.user.id)")
     Page<UserTest> findAllByStateNotProcess(Pageable pageable);
+
+    @Query(value = "with t as (select CAST(u.created as DATE) as cr, d.name as nam, count(*) as coun from u_user u left join user_authority ua on ua.user_id = u.id " +
+            " left join user_detail ut on ut.user_id = u.id left join department d on d.id = ut.department_id " +
+            " where ua.authority_name = 'ROLE_CANDIDATE' and u.created > CAST((CAST(NOW() as DATE) - INTERVAL '7' day) as DATE)" +
+            " group by u.created, d.name) " +
+            " select cr, nam, sum(coun) from t group by cr, nam",
+            nativeQuery = true)
+    Object[] findByWeekAgo();
 }
