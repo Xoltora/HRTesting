@@ -82,7 +82,7 @@ public class ExamServiceImpl implements ExamService {
                     userTest -> {
                         TestSetting testSetting = testSettingRepository.findByTestId(userTest.getTest().getId()).orElse(null);
                         Map<String, Object> map = new LinkedHashMap<>();
-                        map.put("id", userTest.getId());
+                        map.put("id", userTest.getTest().getId());  //// test id to be installed
                         map.put("name", userTest.getTest().getName());
                         map.put("numberOfAttempts", userTest.getNumberOfAttempts());
                         map.put("notStartedOfAttempts", userTest.getNumberOfAttempts() - userTest.getCompletedAttempts());
@@ -274,9 +274,9 @@ public class ExamServiceImpl implements ExamService {
     public ResponseData findById(Long id) {
         ResponseData result = new ResponseData();
 
-        Exam exam = examRepository.findById(id).orElse(null);
+//        Exam exam = examRepository.findById(id).orElse(null);
 
-        if (exam == null) {
+        if (id == null) {
             result.setAccept(false);
             result.setMessage("Экзамен не найден ID = " + id);
             return result;
@@ -284,12 +284,12 @@ public class ExamServiceImpl implements ExamService {
 
         try {
             Map<String, Object> test = new HashMap<>();
-            TestSetting testSetting = testSettingRepository.findByTestId(exam.getTest().getId()).orElse(null);
+            TestSetting testSetting = testSettingRepository.findByTestId(id).orElse(null);
 
-            test.put("id", exam.getId());
+            test.put("id", id);
             test.put("name", testSetting.getTitle());
             test.put("description", testSetting.getDescription());
-            test.put("time", exam.getTime());
+            test.put("time", testSetting.getTime());
 
             result.setData(test);
             result.setAccept(true);
