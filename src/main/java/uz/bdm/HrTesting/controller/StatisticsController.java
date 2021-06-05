@@ -19,10 +19,22 @@ public class StatisticsController {
         this.statisticsService = statisticsService;
     }
 
-    @GetMapping
+    @GetMapping("/department/week")
     public HttpEntity<?> byWeek(){
 
         ResponseData result = statisticsService.byWeek();
+
+        if (result.isAccept()) {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @GetMapping("/department/year")
+    public HttpEntity<?> byYear(){
+
+        ResponseData result = statisticsService.byYear();
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);

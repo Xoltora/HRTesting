@@ -24,7 +24,7 @@ public class Exam extends AuditEntity implements Serializable {
 
     @OneToOne(mappedBy = "exam")
     @JsonIgnore
-    private ExamResult examResult;
+    private ExamResult  examResult;
 
     @ManyToOne
     private User user;

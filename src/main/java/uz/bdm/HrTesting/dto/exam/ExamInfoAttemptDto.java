@@ -19,11 +19,15 @@ public class ExamInfoAttemptDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Date created;
 
-    private Date started;
+    private Integer countQuestion=0;
 
-    private Date finished;
+    private Integer countRight=0;
 
-    private ExamResultDto result;
+    private Integer countWrong=0;
+
+    private Integer countNotAnswered=0;
+
+    private Integer percent=0;
 
     private Integer numberOfAttempt;
 }

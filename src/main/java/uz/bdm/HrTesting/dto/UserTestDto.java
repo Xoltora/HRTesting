@@ -7,18 +7,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.bdm.HrTesting.dto.test.TestDto;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserTestDto {
+    private Long id;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private UserDto user;
+    private String fio;
 
-    private TestDto test;
+    private String testName;
+
+    private String departmentName;
 
     private Integer numberOfAttempts;
 
     private Integer completedAttempts;
+
+    private Date created;
 }

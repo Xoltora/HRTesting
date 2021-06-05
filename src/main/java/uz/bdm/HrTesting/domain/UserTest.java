@@ -42,16 +42,22 @@ public class UserTest extends AuditEntity implements Serializable {
         UserTestDto dto = new UserTestDto();
 
         if (this.user != null) {
-            dto.setUser(this.user.mapToDto());
+            dto.setId(this.user.getId());
+            dto.setFio(this.user.getFio());
         }
 
         if (this.test != null){
-            dto.setTest(this.test.mapToDto());
+            dto.setTestName(this.test.getName());
+            dto.setDepartmentName(this.test.getDepartment().getName());
         }
 
         dto.setNumberOfAttempts(this.numberOfAttempts);
 
         dto.setCompletedAttempts(this.numberOfAttempts - this.completedAttempts);
+
+        if (this.user.getCreated() != null) {
+            dto.setCreated(this.user.getCreated());
+        }
 
         return dto;
     }

@@ -116,7 +116,7 @@ public class ExamController {
     @GetMapping("/finish/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE')")
     public HttpEntity<?> finish(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
-        ResponseData result = examService.finish(id, userPrincipal);
+        ResponseData<Object> result = examService.finish(id, userPrincipal);
 
         if (result.isAccept()) {
             return ResponseEntity.status(HttpStatus.OK).body(result);
@@ -174,7 +174,7 @@ public class ExamController {
     }
 
 
-    @GetMapping("/resultTest/{id}")
+    @GetMapping("/result-test/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_CANDIDATE') or hasAnyAuthority('ROLE_MODERATOR') or hasAnyAuthority('ROLE_RECRUITER')")
     public HttpEntity<?> resultTestById(@PathVariable Long id, @CurrentUser UserPrincipal userPrincipal) {
         ResponseData result = examService.findResultById(id, userPrincipal);

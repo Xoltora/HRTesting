@@ -509,8 +509,6 @@ public class ExamServiceImpl implements ExamService {
                 if (examList.size() > 0) {
                     examInfoDto.setUserId(examList.get(0).getUser().getId());
                     examInfoDto.setFio(examList.get(0).getUser().getFio());
-                    examInfoDto.setDepartmentId(examList.get(0).getTest().getDepartment().getId());
-                    examInfoDto.setDepartmentName(examList.get(0).getTest().getDepartment().getName());
                     examInfoDto.setTestName(examList.get(0).getTest().getName());
                 }
                 List<ExamInfoDto> collect = new ArrayList<>();
@@ -733,6 +731,7 @@ public class ExamServiceImpl implements ExamService {
         ResponseData result = new ResponseData();
 
         try {
+
             List<ExamResult> examResultList = examResultRepository.findAllByExamId(id, userPrincipal.getId());
 
             result.setData(examResultList

@@ -55,7 +55,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 
 
     @Query(value = "with ansvers as (select ed.exam_id as exam_id,  ed.question_id , count(*) as ans_c  from exam_detail ed" +
-            "                 where ed.exam_id = :examId" +
+            "                 where ed.exam_id = :examId and ed.is_deleted is false" +
             "                 group by ed.question_id ,ed.exam_id )," +
             "     ques as (select q.id  as question_id, q.count_right_ans, q.answer_type from question q" +
             "              RIGHT join test ON test.id = q.test_id" +
@@ -66,15 +66,15 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
             "    count_question as (select count(*) from ques)," +
             "    marked as (select count(*) from ques q" +
             "    left join exam_detail ed on q.question_id = ed.question_id" +
-            " where ed.exam_id = :examId and q.answer_type != 'WRITTEN'" +
+            " where ed.exam_id = :examId and q.answer_type != 'WRITTEN' and ed.is_deleted is false" +
             " group by q.question_id )," +
             "    result as ( select a.exam_id , a.question_id , q.count_right_ans," +
             "    count(ed.selectable_ans_id) from ansvers a" +
             "    left join ques q using(question_id)" +
             "    left join exam_detail ed on a.question_id = ed.question_id and a.exam_id = ed.exam_id" +
             "    left join selectable_answer se ON se.id = ed.selectable_ans_id" +
-            " where a.ans_c = q.count_right_ans" +
-            "  and se.right_ans is true" +
+            " where a.ans_c = q.count_right_ans and ed.is_deleted is false" +
+            " and se.right_ans is true" +
             " GROUP BY a.exam_id , a.question_id , q.count_right_ans" +
             " having  count(ed.selectable_ans_id) = q.count_right_ans)" +
             " select * from count_question" +
@@ -158,6 +158,6 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     Exam findByTestAndUserAndNumberOfAttempt(@Param("testId") Long testId, @Param("userId") Long userId, @Param("attemptNumber") Integer attemptNumber);
 
     @Query("SELECT e from Exam e where e.test.id = :testId and e.user.id = :userId")
-    List<Exam> findByTestAndUserAndNumber(@Param("testId") Long testId, @Param("userId") Long userId);
+    List<Exam> findByTestAndUser(@Param("testId") Long testId, @Param("userId") Long userId);
 
 }
